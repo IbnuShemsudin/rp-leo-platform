@@ -1,96 +1,90 @@
-// src/components/SigningManager.jsx
 import React, { useState } from 'react';
 
 export default function SigningManager({ mouId, partnerName, onComplete }) {
   const [isSigning, setIsSigning] = useState(false);
-  const [signData, setSignData] = useState({
-    date: new Date().toISOString().split('T'),
-    signatoryName: '',
-    documentRef: ''
-  });
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleFinalize = async () => {
-    // Logic to update Step 7 in MongoDB
-    const response = await fetch(`http://localhost:5000/api/mou/sign/${mouId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...signData, currentStep: 7, status: 'Active' })
-    });
+  const handleApprove = async () => {
+    setIsSigning(true);
+    
+    // Artificial delay to simulate "Digital Encryption/Verification"
+    setTimeout(async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/mou/sign/${mouId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' }
+        });
 
-    if (response.ok) {
-      alert(`MoU with ${partnerName} officially signed!`);
-      setIsSigning(false);
-      onComplete();
-    }
+        if (response.ok) {
+          setIsSuccess(true);
+          setTimeout(() => {
+            onComplete(); // Refresh the dashboard
+            setIsSigning(false);
+          }, 2000);
+        }
+      } catch (err) {
+        console.error("Signing Error:", err);
+        setIsSigning(false);
+      }
+    }, 1500);
   };
 
-  if (!isSigning) {
-    return (
-      <button 
-        onClick={() => setIsSigning(true)}
-        className="px-4 py-2 bg-rp-gold/10 text-rp-gold rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rp-gold hover:text-white transition-all"
-      >
-        Finalize Step 7
-      </button>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 z- bg-rp-slate/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-lg rounded-[40px] p-10 shadow-2xl border-t-8 border-rp-gold">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-rp-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">🖋️</span>
-          </div>
-          <h2 className="text-2xl font-black text-rp-slate uppercase tracking-tighter">Official Signing</h2>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-            Partner: {partnerName}
-          </p>
-        </div>
-
-        <div className="space-y-5">
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-black uppercase text-gray-400 ml-1">Signing Date</label>
-            <input 
-              type="date" 
-              className="bg-gray-50 p-4 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-rp-gold"
-              value={signData.date}
-              onChange={(e) => setSignData({...signData, date: e.target.value})}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-black uppercase text-gray-400 ml-1">SSGI Authorized Signatory</label>
-            <input 
-              type="text" 
-              placeholder="Full Name of Executive"
-              className="bg-gray-50 p-4 rounded-2xl border-none font-bold text-sm outline-none focus:ring-2 focus:ring-rp-gold"
-              onChange={(e) => setSignData({...signData, signatoryName: e.target.value})}
-            />
-          </div>
-
-          <div className="p-5 bg-orange-50 rounded-2xl border border-orange-100">
-            <p className="text-[10px] text-orange-800 font-medium leading-relaxed italic">
-              "By finalizing, you confirm that physical signatures from both SSGI and {partnerName} have been obtained."
-            </p>
-          </div>
-
-          <div className="flex gap-4 pt-4">
-            <button 
-              onClick={() => setIsSigning(false)}
-              className="flex-1 py-4 text-xs font-black uppercase text-gray-400 hover:text-rp-slate"
-            >
-              Cancel
-            </button>
-            <button 
-              onClick={handleFinalize}
-              className="flex-2 py-4 bg-rp-slate text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-slate-900/30"
-            >
-              Complete Step 7
-            </button>
+    <div className="relative">
+      {!isSuccess ? (
+        <button 
+          onClick={handleApprove}
+          disabled={isSigning}
+          className={`relative overflow-hidden group px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+            isSigning 
+            ? 'bg-rp-slate border-white/10 text-gray-500 cursor-wait' 
+            : 'bg-rp-blue border-rp-accent/30 text-white hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] active:scale-95'
+          }`}
+        >
+          <span className={isSigning ? 'opacity-0' : 'opacity-100'}>Authorize & Sign</span>
+          
+          {isSigning && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-4 h-4 border-2 border-rp-gold border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
+        </button>
+      ) : (
+        <div className="flex items-center gap-2 text-emerald-400 animate-fade-up">
+          <span className="text-lg">Verified</span>
+          <div className="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center border border-emerald-500/30">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" />
+            </svg>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Overlay Modal for the "Signing Ceremony" */}
+      {isSigning && !isSuccess && (
+        <div className="fixed inset-0 z- flex items-center justify-center bg-rp-slate/80 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="glass-panel p-12 rounded-[40px] border border-white/10 text-center max-w-sm space-y-6 shadow-2xl">
+            <div className="relative inline-block">
+               <div className="w-24 h-24 border-2 border-rp-blue/20 rounded-full flex items-center justify-center mx-auto">
+                  <span className="text-4xl animate-pulse">🖋️</span>
+               </div>
+               <div className="absolute inset-0 border-2 border-rp-gold rounded-full border-t-transparent animate-spin"></div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-white font-black uppercase tracking-widest text-sm">Executive Authorization</h3>
+              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">
+                Applying Digital Seal for <br/>
+                <span className="text-rp-gold">{partnerName}</span>
+              </p>
+            </div>
+            
+            <div className="h-1 w-32 bg-white/5 mx-auto rounded-full overflow-hidden">
+               <div className="h-full bg-rp-blue animate-shimmer"></div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -26,18 +27,12 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        // Update global auth state and persist to local storage
         login(data.user, data.token);
-        // Navigate to dashboard using React Router's internal state
         navigate('/dashboard');
       } else {
-        // Detailed error reporting for the 400 Bad Request
-        console.error("Auth Error Status:", response.status);
-        console.error("Server Message:", data.msg);
         alert(data.msg || 'Authorization failed. Please check your credentials.');
       }
     } catch (err) {
-      console.error("Network/Server Connection Error:", err);
       alert("Critical: Could not connect to the SSGI Authentication server.");
     } finally {
       setIsSubmitting(false);
@@ -45,62 +40,102 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 geospatial-grid">
-      <div className="max-w-md w-full p-10 bg-white rounded-[40px] shadow-2xl border border-gray-100 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-rp-blue rounded-2xl mb-4 shadow-lg shadow-blue-900/20">
-            <span className="text-white font-black text-xl tracking-tighter">SSGI</span>
-          </div>
-          <h2 className="text-2xl font-black text-rp-slate uppercase tracking-tight">Staff Access</h2>
-          <p className="text-[10px] font-black text-rp-gold uppercase tracking-[0.2em] mt-2 leading-none">
-            Regional Partnership Portal
-          </p>
-        </div>
+    <div className="min-h-screen bg-space-portal text-slate-100 relative selection:bg-rp-blue/30 overflow-hidden">
+      <Navbar />
+      
+      {/* Cinematic Background Elements */}
+      <div className="scanline opacity-10 pointer-events-none fixed inset-0 z-0" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-rp-blue/10 rounded-full blur-[120px] -z-10 animate-pulse" />
+      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-rp-gold/5 rounded-full blur-[100px] -z-10" />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Official Email</label>
-            <input 
-              type="email" 
-              required
-              disabled={isSubmitting}
-              className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-rp-blue focus:bg-white outline-none transition-all font-bold text-rp-slate placeholder:text-gray-300 placeholder:font-medium disabled:opacity-50"
-              placeholder="name@ssgi.gov.et"
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Security Key</label>
-            <input 
-              type="password" 
-              required
-              disabled={isSubmitting}
-              className="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-rp-blue focus:bg-white outline-none transition-all font-bold text-rp-slate placeholder:text-gray-300 disabled:opacity-50"
-              placeholder="••••••••"
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+      <div className="flex items-center justify-center min-h-screen pt-20 px-6">
+        <div className="max-w-md w-full glass-panel p-12 rounded-[48px] border border-white/10 relative z-10 shadow-3xl animate-in fade-in slide-in-from-bottom-8 duration-1000">
           
-          <button 
-            type="submit"
-            disabled={isSubmitting}
-            className={`w-full py-5 bg-rp-blue text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-900/20 hover:bg-rp-slate transition-all active:scale-95 flex justify-center items-center gap-3 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Verifying...
-              </>
-            ) : (
-              'Authorize Entry'
-            )}
-          </button>
-        </form>
+          {/* Subtle Satellite Icon Backdrop */}
+          <div className="absolute top-0 right-0 p-8 opacity-5 text-6xl pointer-events-none">🛰️</div>
 
-        <p className="mt-8 text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-          Secured by RPD Cybersecurity Protocol
-        </p>
+          <div className="text-center mb-12">
+            <span className="text-[10px] font-black text-rp-gold uppercase tracking-[0.5em] mb-4 block">
+              Restricted Access
+            </span>
+            <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-2">
+              Staff <span className="text-rp-blue italic">Uplink</span>
+            </h2>
+            <p className="text-[9px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-4">
+              Authorize Personnel Credentials
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-2">
+              <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 ml-4">
+                Official Email
+              </label>
+              <input 
+                type="email" 
+                required
+                disabled={isSubmitting}
+                className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl outline-none focus:border-rp-blue transition-all font-bold text-sm text-white placeholder:text-white/10 disabled:opacity-50"
+                placeholder="name@ssgi.gov.et"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 ml-4">
+                Security Key
+              </label>
+              <input 
+                type="password" 
+                required
+                disabled={isSubmitting}
+                className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl outline-none focus:border-rp-blue transition-all font-bold text-sm text-white placeholder:text-white/10 disabled:opacity-50"
+                placeholder="••••••••••••"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            
+            <button 
+              type="submit"
+              disabled={isSubmitting}
+              className={`w-full bg-rp-blue text-white py-6 rounded-[24px] font-black uppercase tracking-[0.3em] text-[10px] hover:bg-rp-gold hover:text-white transition-all shadow-2xl shadow-blue-900/40 active:scale-95 flex justify-center items-center gap-3 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Synchronizing...
+                </>
+              ) : (
+                'Launch Uplink'
+              )}
+            </button>
+          </form>
+
+          {/* System Footer Status */}
+          <div className="mt-12 pt-8 border-t border-white/5 flex flex-col items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+              <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest">
+                Protocol <span className="text-gray-300">Secure</span>
+              </p>
+            </div>
+            
+            <div className="flex gap-2">
+              { [0, 1, 2].map((i) => (
+                <div key={i} className="w-8 h-[1.5px] bg-white/5 rounded-full overflow-hidden">
+                  <div className={`h-full bg-rp-gold/60 ${i === 0 ? 'w-full animate-pulse' : 'w-0'}`} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
+
+      <footer className="py-12 text-center relative z-10">
+        <p className="text-[8px] font-black uppercase tracking-[0.6em] text-gray-700">
+          Regional Partnership Lead Executive Office &copy; 2026
+        </p>
+      </footer>
     </div>
   );
 }

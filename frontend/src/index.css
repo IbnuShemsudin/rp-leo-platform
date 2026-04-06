@@ -1,29 +1,31 @@
+/* src/index.css */
+
 @import "tailwindcss";
 
 @theme {
-  /* Colors extracted from the SSGI logo and brochure headers */
-  --color-rp-blue: #1e3a8a;    /* Deep Navy from "Space Science" [cite: 1] */
-  --color-rp-gold: #b45309;    /* Gold from the satellite icon [cite: 2] */
-  --color-rp-slate: #0f172a;   /* Dark Slate for professional text [cite: 11] */
-  --color-rp-accent: #3b82f6;  /* Brighter blue for interactive elements */
-}
-/* src/index.css additions */
-.geospatial-grid {
-  background-image: radial-gradient(circle at 2px 2px, #e5e7eb 1px, transparent 0);
-  background-size: 40px 40px;
+  --color-rp-blue: #1e3a8a;
+  --color-rp-gold: #b45309;
+  --color-rp-slate: #0f172a;
 }
 
-.rp-gradient-text {
-  background: linear-gradient(to right, #1e3a8a, #b45309);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* THE NEW GLOBAL BACKGROUND */
+.bg-space-portal {
+  background-color: #0f172a; /* Base: Dark Slate */
+  background-image: 
+    /* Layer 1: Geospatial Grid (Very faint white dots) */
+    radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.03) 1px, transparent 0),
+    /* Layer 2: Deep Blue Glow (Top Right) */
+    radial-gradient(circle at 80% 20%, rgba(30, 58, 138, 0.15) 0%, transparent 40%),
+    /* Layer 3: Gold Ember Glow (Bottom Left) */
+    radial-gradient(circle at 10% 80%, rgba(180, 83, 9, 0.08) 0%, transparent 30%);
+  background-size: 40px 40px, 100% 100%, 100% 100%;
+  background-attachment: fixed;
 }
 
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.animate-marquee {
-  display: flex;
-  animation: marquee 30s linear infinite;
+/* Transparent Glass Panel for Tables/Cards */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
 }

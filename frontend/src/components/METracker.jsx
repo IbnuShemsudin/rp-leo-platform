@@ -1,50 +1,75 @@
-// src/components/METracker.jsx
 import React from 'react';
 
-export default function METracker({ mouName, progress = 75 }) {
-  return (
-    <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-xl shadow-blue-900/5">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h3 className="text-xl font-black text-rp-slate uppercase tracking-tight">Audit & Impact Report</h3>
-          <p className="text-[10px] font-black text-rp-gold uppercase tracking-[0.2em] mt-1">
-            Monitoring & Evaluation Phase (Step 10)
-          </p>
-        </div>
-        <button className="bg-gray-50 hover:bg-rp-blue hover:text-white p-3 rounded-2xl transition-all">
-          <span className="text-xs font-black uppercase tracking-widest px-4">Upload Audit PDF</span>
-        </button>
-      </div>
+export default function METracker({ progress = 78 }) {
+  // SVG Circle Math
+  const radius = 70;
+  const stroke = 8;
+  const normalizedRadius = radius - stroke * 2;
+  const circumference = normalizedRadius * 2 * Math.PI;
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
 
-      {/* Progress Visualization */}
-      <div className="space-y-6">
-        <div className="flex justify-between items-end">
-          <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Implementation Goal Reach</span>
-          <span className="text-3xl font-black text-rp-blue">{progress}%</span>
-        </div>
-        
-        <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden p-1">
-          <div 
-            className="h-full bg-linear-to-r from-rp-blue to-rp-gold rounded-full transition-all duration-1000 shadow-lg"
-            style={{ width: `${progress}%` }}
+  return (
+    <div className="glass-panel p-8 rounded-[40px] flex items-center gap-10 border border-white/5 relative overflow-hidden group">
+      {/* Background Decorative Glow */}
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-rp-blue/5 to-transparent pointer-events-none"></div>
+
+      {/* Radial Progress Gauge */}
+      <div className="relative flex items-center justify-center shrink-0">
+        <svg height={radius * 2} width={radius * 2} className="transform -rotate-90 drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+          {/* Background Track */}
+          <circle
+            stroke="rgba(255,255,255,0.05)"
+            fill="transparent"
+            strokeWidth={stroke}
+            r={normalizedRadius}
+            cx={radius}
+            cy={radius}
           />
-        </div>
-
-        <div className="grid grid-cols-3 gap-4 mt-8">
-          <MetricCard label="Resources Mobilized" value="High" color="text-green-500" />
-          <MetricCard label="Timeline Status" value="On Track" color="text-rp-blue" />
-          <MetricCard label="Policy Alignment" value="Verified" color="text-rp-gold" />
+          {/* Animated Progress Track */}
+          <circle
+            stroke="var(--color-rp-blue)"
+            fill="transparent"
+            strokeWidth={stroke}
+            strokeDasharray={circumference + ' ' + circumference}
+            style={{ strokeDashoffset, transition: 'stroke-dashoffset 1.5s ease-in-out' }}
+            strokeLinecap="round"
+            r={normalizedRadius}
+            cx={radius}
+            cy={radius}
+          />
+        </svg>
+        <div className="absolute flex flex-col items-center justify-center">
+          <span className="text-3xl font-black text-white leading-none">{progress}%</span>
+          <span className="text-[8px] font-black text-rp-gold uppercase tracking-widest mt-1">Efficiency</span>
         </div>
       </div>
-    </div>
-  );
-}
 
-function MetricCard({ label, value, color }) {
-  return (
-    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{label}</p>
-      <p className={`text-sm font-black uppercase ${color}`}>{value}</p>
+      {/* Data Readout */}
+      <div className="flex-1 space-y-4">
+        <div>
+          <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-1">System Health</h3>
+          <p className="text-xl font-black text-white uppercase tracking-tighter">Regional Impact Rating</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <span className="text-[9px] font-black text-gray-500 uppercase">Compliance</span>
+            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+              <div className="h-full bg-emerald-500 w-[92%]"></div>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <span className="text-[9px] font-black text-gray-500 uppercase">Reporting</span>
+            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+              <div className="h-full bg-rp-gold w-[65%]"></div>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-[10px] text-gray-400 font-bold leading-relaxed border-t border-white/5 pt-4">
+          <span className="text-emerald-400">● LIVE:</span> SSGI regional assets are performing within nominal parameters. 4 MoUs pending quarterly evaluation.
+        </p>
+      </div>
     </div>
   );
 }
