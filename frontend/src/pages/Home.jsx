@@ -3,40 +3,61 @@ import Navbar from '../components/Navbar';
 import WorkflowStepper from '../components/WorkflowStepper';
 import ContactModal from '../components/ContactModal'; // Import the new modal component
 import { Link } from 'react-router-dom';
+import { Globe, Users, TrendingUp, FileText, Activity, Zap, Shield, Target, ArrowRight } from 'lucide-react';
 
 // Internal Sub-component: FocusCard (Dark Themed)
-const FocusCard = ({ title, desc }) => (
-  <div className="space-y-4 group p-8 rounded-[32px] bg-white/5 border border-white/5 hover:border-rp-blue/50 transition-all duration-500 hover:bg-white/[0.07]">
-    <div className="w-12 h-1 bg-rp-gold group-hover:w-24 transition-all duration-500 shadow-[0_0_10px_#b45309]"></div>
-    <h3 className="text-xl font-black uppercase tracking-tight text-white">{title}</h3>
-    <p className="text-gray-400 text-sm leading-relaxed font-medium">{desc}</p>
+const FocusCard = ({ title, desc, icon: Icon }) => (
+  <div className="space-y-4 group p-8 rounded-[32px] bg-white/5 border border-white/5 hover:border-rp-blue/50 transition-all duration-500 hover:bg-white/[0.07] hover:scale-[1.02] hover:shadow-2xl hover:shadow-rp-blue/10 relative overflow-hidden">
+    {/* Ambient Glow Effect */}
+    <div className="absolute inset-0 bg-gradient-to-br from-rp-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+    <div className="relative">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 bg-gradient-to-br from-white/5 to-white/10 rounded-2xl flex items-center justify-center border border-white/10 group-hover:border-rp-blue/30 transition-all duration-300 group-hover:scale-110">
+          <Icon size={20} className="text-rp-blue group-hover:text-rp-gold transition-colors" />
+        </div>
+        <div className="w-12 h-1 bg-rp-gold group-hover:w-24 transition-all duration-500 shadow-[0_0_10px_#b45309]"></div>
+      </div>
+      <h3 className="text-xl font-black uppercase tracking-tight text-white group-hover:text-rp-blue transition-colors">{title}</h3>
+      <p className="text-gray-400 text-sm leading-relaxed font-medium group-hover:text-gray-300 transition-colors">{desc}</p>
+    </div>
   </div>
 );
 
 // Internal Sub-component: StatSection (Glassmorphism)
 const StatSection = () => {
   const stats = [
-    { label: "Active MoUs", value: "120+", icon: "📄" },
-    { label: "Global Partners", value: "45", icon: "🌍" },
-    { label: "Regional Reach", value: "EA-ROAD", icon: "📡" },
-    { label: "Growth Models", value: "10+", icon: "📈" },
+    { label: "Active MoUs", value: "120+", icon: FileText, color: "text-emerald-400" },
+    { label: "Global Partners", value: "45", icon: Globe, color: "text-rp-blue" },
+    { label: "Regional Reach", value: "EA-ROAD", icon: Target, color: "text-rp-gold" },
+    { label: "Growth Models", value: "10+", icon: TrendingUp, color: "text-purple-400" },
   ];
 
   return (
     <section className="py-20 relative z-10">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-          {stats.map((stat, i) => (
-            <div key={i} className="glass-panel group p-8 rounded-[40px] border border-white/5 hover:border-rp-gold/30 hover:shadow-[0_0_30px_rgba(180,83,9,0.1)] transition-all duration-500 text-center lg:text-left">
-              <div className="text-3xl mb-4 grayscale group-hover:grayscale-0 transition-all">{stat.icon}</div>
-              <div className="text-4xl font-black text-white tracking-tighter group-hover:text-rp-blue transition-colors">
-                {stat.value}
+          {stats.map((stat, i) => {
+            const Icon = stat.icon;
+            return (
+              <div key={i} className="glass-panel group p-8 rounded-[40px] border border-white/5 hover:border-rp-gold/30 hover:shadow-[0_0_30px_rgba(180,83,9,0.1)] transition-all duration-500 text-center lg:text-left hover:scale-[1.02] hover:shadow-2xl hover:shadow-rp-gold/10 relative overflow-hidden">
+                {/* Ambient Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-rp-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                <div className="relative">
+                  <div className="w-12 h-12 bg-gradient-to-br from-white/5 to-white/10 rounded-2xl flex items-center justify-center border border-white/10 group-hover:border-rp-gold/30 transition-all duration-300 group-hover:scale-110 mb-4 mx-auto lg:mx-0">
+                    <Icon size={20} className={`text-gray-400 group-hover:${stat.color} transition-colors`} />
+                  </div>
+                  <div className="text-4xl font-black text-white tracking-tighter group-hover:text-rp-blue transition-colors">
+                    {stat.value}
+                  </div>
+                  <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mt-2 group-hover:text-gray-400 transition-colors">
+                    {stat.label}
+                  </div>
+                </div>
               </div>
-              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mt-2">
-                {stat.label}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
@@ -46,28 +67,58 @@ const StatSection = () => {
 // Internal Sub-component: RegionalFocus (Orbit Animation)
 const RegionalFocus = () => (
   <section className="py-24 overflow-hidden relative">
-    <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+    {/* Enhanced Background Effects */}
+    <div className="absolute top-[-20%] right-[-10%] w-[400px] h-[400px] bg-rp-blue/5 rounded-full blur-[120px] pointer-events-none animate-pulse" />
+    <div className="absolute bottom-[-20%] left-[-10%] w-[300px] h-[300px] bg-rp-gold/4 rounded-full blur-[100px] pointer-events-none" />
+
+    <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center relative z-10">
       <div className="relative order-2 lg:order-1">
-        <div className="aspect-square rounded-full border border-white/10 animate-[spin_60s_linear_infinite] p-12 relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 bg-rp-blue rounded-full shadow-[0_0_15px_#1e3a8a]"></div>
-          <div className="w-full h-full rounded-full bg-gradient-to-tr from-rp-blue/10 to-rp-gold/5 flex items-center justify-center backdrop-blur-3xl">
-            <div className="glass-panel w-40 h-40 rounded-[40px] shadow-2xl flex items-center justify-center rotate-12 border border-white/20">
-              <span className="text-rp-blue font-black text-2xl tracking-tighter">EA-ROAD</span>
+        <div className="aspect-square rounded-full border border-white/10 animate-[spin_60s_linear_infinite] p-12 relative group hover:border-rp-blue/30 transition-all duration-500">
+          {/* Animated Grid Overlay */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+            <div className="w-full h-full border-[0.5px] border-rp-blue/20 rounded-full animate-spin" style={{animationDuration: '45s'}}></div>
+            <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 border-[0.5px] border-rp-gold/15 rounded-full animate-spin" style={{animationDuration: '30s', animationDirection: 'reverse'}}></div>
+          </div>
+
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 bg-rp-blue rounded-full shadow-[0_0_15px_#1e3a8a] animate-pulse"></div>
+          <div className="w-full h-full rounded-full bg-gradient-to-tr from-rp-blue/10 to-rp-gold/5 flex items-center justify-center backdrop-blur-3xl group-hover:scale-105 transition-transform duration-500">
+            <div className="glass-panel w-40 h-40 rounded-[40px] shadow-2xl flex items-center justify-center rotate-12 border border-white/20 group-hover:border-rp-blue/30 transition-all duration-500">
+              <span className="text-rp-blue font-black text-2xl tracking-tighter group-hover:text-rp-gold transition-colors">EA-ROAD</span>
             </div>
           </div>
+
+          {/* Connection Points */}
+          <div className="absolute top-1/4 right-1/4 w-2 h-2 bg-emerald-500 rounded-full animate-bounce"></div>
+          <div className="absolute bottom-1/4 left-1/4 w-2 h-2 bg-rp-gold rounded-full animate-bounce" style={{animationDelay: '0.5s'}}></div>
         </div>
       </div>
-      
+
       <div className="space-y-6 order-1 lg:order-2">
-        <div className="w-20 h-1 bg-rp-blue mb-8"></div>
-        <h2 className="text-5xl font-black text-white uppercase tracking-tighter leading-none">
-          Regional <span className="text-rp-blue text-outline">Integration</span> <br />
-          & <span className="text-rp-gold">Coordination</span>
+        <div className="flex items-center gap-3">
+          <div className="w-20 h-1 bg-rp-blue group-hover:w-24 transition-all duration-500"></div>
+          <div className="flex items-center gap-2 px-3 py-1 bg-rp-blue/10 border border-rp-blue/20 rounded-full">
+            <Activity size={12} className="text-rp-blue" />
+            <span className="text-[8px] font-black text-rp-blue uppercase tracking-tighter">REGIONAL HUB</span>
+          </div>
+        </div>
+        <h2 className="text-5xl font-black text-white uppercase tracking-tighter leading-none group-hover:text-rp-blue transition-colors">
+          Regional <span className="text-rp-blue text-outline group-hover:text-rp-gold transition-colors">Integration</span> <br />
+          & <span className="text-rp-gold group-hover:text-rp-blue transition-colors">Coordination</span>
         </h2>
-        <p className="text-gray-400 font-medium leading-relaxed max-w-xl text-lg">
-          Coordinating the East Africa Regional Office of Astronomy for Development (EA-ROAD). 
+        <p className="text-gray-400 font-medium leading-relaxed max-w-xl text-lg group-hover:text-gray-300 transition-colors">
+          Coordinating the East Africa Regional Office of Astronomy for Development (EA-ROAD).
           We bridge geospatial gaps through resource mobilization and inter-continental synergy.
         </p>
+        <div className="flex items-center gap-4 pt-4">
+          <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+            <Zap size={12} className="text-emerald-400" />
+            <span className="text-[8px] font-black text-emerald-400 uppercase tracking-tighter">ACTIVE SYNC</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+            <Shield size={12} className="text-rp-gold" />
+            <span className="text-[8px] font-black text-rp-gold uppercase tracking-tighter">SECURE LINK</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -77,7 +128,18 @@ export default function Home() {
   const [isContactOpen, setIsContactOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-space-portal text-slate-100 selection:bg-rp-gold selection:text-white transition-colors duration-500 relative">
+    <div className="min-h-screen bg-space-portal text-slate-100 selection:bg-rp-gold selection:text-white transition-colors duration-500 relative overflow-hidden">
+      {/* Enhanced Global Background Effects */}
+      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-rp-blue/5 rounded-full blur-[140px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-rp-gold/4 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/2 rounded-full blur-[160px] pointer-events-none" />
+
+      {/* Subtle Tech Pattern */}
+      <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+        <div className="absolute top-[-5%] left-[-5%] w-full h-full border-[0.5px] border-rp-blue/20 rounded-full"></div>
+        <div className="absolute top-[15%] right-[-5%] w-2/3 h-2/3 border-[0.5px] border-rp-gold/15 rounded-full"></div>
+      </div>
+
       <Navbar />
       <div className="scanline opacity-10 pointer-events-none fixed inset-0 z-0"></div>
 
@@ -85,44 +147,44 @@ export default function Home() {
       <section className="relative pt-32 pb-20 lg:pt-56 overflow-hidden z-10">
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-10 animate-fade-up">
-            <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+            <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md group hover:border-rp-blue/30 transition-all duration-300">
               <span className="w-2 h-2 rounded-full bg-rp-blue animate-pulse"></span>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 group-hover:text-rp-blue transition-colors">
                 Space Science & Geospatial Institute
               </span>
             </div>
-            
-            <h1 className="text-6xl lg:text-8xl font-black text-white leading-[0.85] tracking-tighter">
+
+            <h1 className="text-6xl lg:text-8xl font-black text-white leading-[0.85] tracking-tighter group-hover:text-rp-blue transition-colors">
               Connecting <br />
-              <span className="text-rp-blue">Space & Geo</span> <br />
+              <span className="text-rp-blue group-hover:text-rp-gold transition-colors">Space & Geo</span> <br />
               Sector Goals.
             </h1>
-            
-            <p className="text-xl text-gray-400 max-w-lg leading-relaxed font-medium">
-              Fostering collaborative growth models with national and international 
+
+            <p className="text-xl text-gray-400 max-w-lg leading-relaxed font-medium group-hover:text-gray-300 transition-colors">
+              Fostering collaborative growth models with national and international
               industry players to enhance Ethiopia's technological development.
             </p>
-            
+
             <div className="flex gap-6 pt-4">
-              <Link to="/login" className="bg-rp-blue text-white px-12 py-5 rounded-[20px] font-black uppercase tracking-widest text-xs shadow-2xl shadow-blue-900/40 hover:bg-white hover:text-rp-blue transition-all active:scale-95">
+              <Link to="/login" className="bg-rp-blue text-white px-12 py-5 rounded-[20px] font-black uppercase tracking-widest text-xs shadow-2xl shadow-blue-900/40 hover:bg-white hover:text-rp-blue transition-all active:scale-95 hover:scale-105 hover:shadow-rp-blue/20">
                 Registry Portal
               </Link>
-              <button 
+              <button
                 onClick={() => document.getElementById('about-rpd').scrollIntoView({ behavior: 'smooth' })}
-                className="border border-white/10 text-white px-10 py-5 rounded-[20px] font-black uppercase tracking-widest text-xs hover:bg-white/5 transition-all"
+                className="border border-white/10 text-white px-10 py-5 rounded-[20px] font-black uppercase tracking-widest text-xs hover:bg-white/5 hover:border-rp-gold/30 transition-all hover:scale-105 hover:shadow-lg hover:shadow-rp-gold/10"
               >
                 Learn More
               </button>
             </div>
           </div>
 
-          <div className="relative hidden lg:block animate-in zoom-in duration-1000">
-            <div className="aspect-square bg-gradient-to-tr from-rp-blue/40 to-blue-600/10 rounded-[80px] rotate-6 shadow-3xl border border-white/10 flex items-center justify-center p-12 overflow-hidden relative">
+          <div className="relative hidden lg:block animate-in zoom-in duration-1000 group">
+            <div className="aspect-square bg-gradient-to-tr from-rp-blue/40 to-blue-600/10 rounded-[80px] rotate-6 shadow-3xl border border-white/10 flex items-center justify-center p-12 overflow-hidden relative group-hover:scale-105 transition-transform duration-500">
                 <div className="absolute inset-0 opacity-20 geospatial-grid"></div>
-                <span className="text-9xl font-black italic text-white/10 select-none">SSGI</span>
+                <span className="text-9xl font-black italic text-white/10 select-none group-hover:text-white/20 transition-colors">SSGI</span>
                 <div className="absolute bottom-10 right-10 flex gap-2">
-                   <div className="w-2 h-2 rounded-full bg-rp-gold"></div>
-                   <div className="w-2 h-2 rounded-full bg-rp-blue"></div>
+                   <div className="w-2 h-2 rounded-full bg-rp-gold animate-pulse"></div>
+                   <div className="w-2 h-2 rounded-full bg-rp-blue animate-pulse" style={{animationDelay: '0.5s'}}></div>
                 </div>
             </div>
           </div>
@@ -135,18 +197,31 @@ export default function Home() {
       {/* 3. CORE FOCUS AREAS */}
       <section className="py-24 relative z-10">
         <div className="max-w-7xl mx-auto px-8">
+          <div className="text-center mb-16">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="h-[1px] w-8 bg-gradient-to-r from-rp-blue to-rp-gold"></div>
+              <span className="text-[10px] font-black uppercase tracking-[0.6em] text-rp-blue">Core Capabilities</span>
+              <div className="h-[1px] w-8 bg-gradient-to-r from-rp-gold to-rp-blue"></div>
+            </div>
+            <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">Strategic Focus Areas</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">Driving innovation through strategic partnerships and cutting-edge research initiatives.</p>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-8">
-            <FocusCard 
-              title="Strategic Collaboration" 
-              desc="Facilitating strategic collaborations at national, regional, and international levels to align with Ethiopian developmental goals." 
+            <FocusCard
+              title="Strategic Collaboration"
+              desc="Facilitating strategic collaborations at national, regional, and international levels to align with Ethiopian developmental goals."
+              icon={Users}
             />
-            <FocusCard 
-              title="M&E Management" 
-              desc="Overseeing, monitoring, and evaluating signed MoUs and tracking implementations through rigorous geospatial benchmarks." 
+            <FocusCard
+              title="M&E Management"
+              desc="Overseeing, monitoring, and evaluating signed MoUs and tracking implementations through rigorous geospatial benchmarks."
+              icon={Activity}
             />
-            <FocusCard 
-              title="Research & Policy" 
-              desc="Conducting research on Space Science sectors and identifying regional integration gaps within the East African block." 
+            <FocusCard
+              title="Research & Policy"
+              desc="Conducting research on Space Science sectors and identifying regional integration gaps within the East African block."
+              icon={Target}
             />
           </div>
         </div>
@@ -208,15 +283,40 @@ export default function Home() {
 
       {/* 6. CTA FOOTER */}
       <section className="pb-32 px-6 relative z-10">
-        <div className="max-w-5xl mx-auto glass-panel p-16 rounded-[60px] text-center border border-white/10 shadow-2xl relative overflow-hidden">
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-rp-blue/20 rounded-full blur-3xl"></div>
-          <h2 className="text-5xl font-black text-white uppercase tracking-tighter mb-8 relative z-10">Ready to <span className="text-rp-gold">Collaborate?</span></h2>
-          <button 
-            onClick={() => setIsContactOpen(true)}
-            className="bg-rp-gold text-white px-14 py-6 rounded-[24px] font-black uppercase tracking-widest text-sm hover:scale-105 transition-all shadow-xl shadow-amber-900/20 relative z-10"
-          >
-            Contact RPD Division
-          </button>
+        <div className="max-w-5xl mx-auto glass-panel p-16 rounded-[60px] text-center border border-white/10 shadow-2xl relative overflow-hidden group hover:border-rp-blue/20 transition-all duration-500 hover:scale-[1.01] hover:shadow-rp-blue/10">
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-rp-blue/20 rounded-full blur-3xl group-hover:bg-rp-gold/20 transition-colors duration-500"></div>
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-rp-gold/20 rounded-full blur-3xl group-hover:bg-rp-blue/20 transition-colors duration-500"></div>
+
+          <div className="relative z-10">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-rp-blue">Ready for Partnership</span>
+              <div className="w-3 h-3 bg-rp-gold rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+            </div>
+
+            <h2 className="text-5xl font-black text-white uppercase tracking-tighter mb-8 group-hover:text-rp-blue transition-colors">Ready to <span className="text-rp-gold group-hover:text-rp-blue transition-colors">Collaborate?</span></h2>
+
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+                <Globe size={12} className="text-rp-blue" />
+                <span className="text-[8px] font-black text-rp-blue uppercase tracking-tighter">GLOBAL NETWORK</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+                <Shield size={12} className="text-emerald-400" />
+                <span className="text-[8px] font-black text-emerald-400 uppercase tracking-tighter">SECURE PLATFORM</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsContactOpen(true)}
+              className="bg-rp-gold text-white px-14 py-6 rounded-[24px] font-black uppercase tracking-widest text-sm hover:scale-105 transition-all shadow-xl shadow-amber-900/20 hover:shadow-rp-gold/30 hover:bg-rp-blue relative group/btn"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                Contact RPD Division
+                <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+              </span>
+            </button>
+          </div>
         </div>
       </section>
 

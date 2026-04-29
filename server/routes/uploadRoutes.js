@@ -1,17 +1,16 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../middleware/upload");
+const upload = require("../middleware/upload"); // Ensure this path is correct
 
-// POST: http://localhost:5000/api/upload
+// This defines the endpoint: POST http://localhost:5000/api/upload/
 router.post("/", upload.single("file"), (req, res) => {
   try {
-    // Debugging: This will show in your terminal
-    console.log("Uplink Request Received. File:", req.file ? req.file.originalname : "NULL");
-
+    // 1. Check if the file was actually uploaded by Multer
     if (!req.file) {
       return res.status(400).json({ message: "No file uplinked. Check field name." });
     }
 
+    // 2. Send back the file data to the frontend
     res.json({
       message: "File uploaded successfully",
       file: {

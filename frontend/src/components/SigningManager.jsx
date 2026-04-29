@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 
 export default function SigningManager({ mouId, partnerName, onComplete }) {
+  const { token } = useAuth();
   const [isSigning, setIsSigning] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -12,7 +14,10 @@ export default function SigningManager({ mouId, partnerName, onComplete }) {
       try {
         const response = await fetch(`http://localhost:5000/api/mou/sign/${mouId}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' }
+          headers: {
+            'Content-Type': 'application/json',
+            'x-auth-token': token
+          }
         });
 
         if (response.ok) {
@@ -21,9 +26,13 @@ export default function SigningManager({ mouId, partnerName, onComplete }) {
             onComplete(); // Refresh the dashboard
             setIsSigning(false);
           }, 2000);
+        } else {
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body.msg || body.message || 'Signing failed');
         }
       } catch (err) {
         console.error("Signing Error:", err);
+        alert(err.message || 'Unable to sign MoU');
         setIsSigning(false);
       }
     }, 1500);

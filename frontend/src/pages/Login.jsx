@@ -111,6 +111,12 @@ export default function Login() {
             </button>
           </form>
 
+          <div className="mt-6 text-center">
+            <Link to="/register" className="text-[10px] font-bold text-rp-gold hover:text-white transition-colors uppercase tracking-widest">
+              Create New Account
+            </Link>
+          </div>
+
           {/* System Footer Status */}
           <div className="mt-12 pt-8 border-t border-white/5 flex flex-col items-center gap-6">
             <div className="flex items-center gap-3">

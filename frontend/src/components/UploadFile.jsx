@@ -40,7 +40,8 @@ export default function UploadFile({ onUploadSuccess, uploadType = 'mous' }) {
         clearInterval(interval);
         setProgress(100);
         setTimeout(() => {
-          onUploadSuccess(data.file);
+          const uploadedName = data.file?.filename || data.file || data.filename;
+          onUploadSuccess(uploadedName);
           setUploading(false);
           setFile(null);
           setProgress(0);

@@ -1,5 +1,6 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
+import { Rocket, Globe, Radio, GraduationCap, TrendingUp, FileText, ArrowRight, Activity, Shield, Zap } from 'lucide-react';
 
 const SECTORS = [
   {
@@ -8,7 +9,9 @@ const SECTORS = [
     focus: 'CubeSat & NanoSat Development',
     status: 'High Priority',
     description: 'Seeking partners for local assembly, integration, and testing (AIT) facilities to bolster Ethiopia’s indigenous space capabilities.',
-    tags: ['AIT', 'Hardware', 'Hardware Transfer']
+    tags: ['AIT', 'Hardware', 'Hardware Transfer'],
+    icon: Rocket,
+    color: 'text-rp-gold'
   },
   {
     id: 'GEO-02',
@@ -16,7 +19,9 @@ const SECTORS = [
     focus: 'AI-Driven Earth Observation',
     status: 'Open for Proposals',
     description: 'Collaborating on deep-learning models for agricultural yield prediction, urban planning, and disaster management using Sentinel-2 data.',
-    tags: ['Big Data', 'Machine Learning', 'Agriculture']
+    tags: ['Big Data', 'Machine Learning', 'Agriculture'],
+    icon: Globe,
+    color: 'text-rp-blue'
   },
   {
     id: 'AST-03',
@@ -24,7 +29,9 @@ const SECTORS = [
     focus: 'Entoto Radio Astronomy',
     status: 'Strategic Research',
     description: 'Development of VLBI (Very Long Baseline Interferometry) capabilities in coordination with the EA-ROAD regional network.',
-    tags: ['Radio Astronomy', 'EA-ROAD', 'Deep Space']
+    tags: ['Radio Astronomy', 'EA-ROAD', 'Deep Space'],
+    icon: Radio,
+    color: 'text-emerald-400'
   },
   {
     id: 'EDU-04',
@@ -32,77 +39,137 @@ const SECTORS = [
     focus: 'Post-Doc & Technical Training',
     status: 'Continuous',
     description: 'Joint PhD programs and technical certifications in Space Engineering and Remote Sensing for African scholars.',
-    tags: ['Education', 'STEM', 'Fellowships']
+    tags: ['Education', 'STEM', 'Fellowships'],
+    icon: GraduationCap,
+    color: 'text-purple-400'
   }
 ];
 
 export default function Opportunities() {
   return (
-    <div className="min-h-screen bg-space-portal text-slate-100 relative">
+    <div className="min-h-screen bg-space-portal text-slate-100 relative overflow-hidden">
+      {/* Enhanced Background Effects */}
+      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-rp-blue/5 rounded-full blur-[140px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-rp-gold/4 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/2 rounded-full blur-[160px] pointer-events-none" />
+
+      {/* Subtle Tech Pattern */}
+      <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+        <div className="absolute top-[-5%] left-[-5%] w-full h-full border-[0.5px] border-rp-blue/20 rounded-full"></div>
+        <div className="absolute top-[15%] right-[-5%] w-2/3 h-2/3 border-[0.5px] border-rp-gold/15 rounded-full"></div>
+      </div>
+
       <Navbar />
       <div className="scanline opacity-10 pointer-events-none fixed inset-0 z-0"></div>
 
       <main className="relative z-10 pt-32 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <header className="mb-16 animate-fade-up">
-            <h1 className="text-[10px] font-black text-rp-blue uppercase tracking-[0.5em] mb-4">Investment & Cooperation</h1>
-            <h2 className="text-6xl font-black text-white uppercase tracking-tighter">
-              Strategic <span className="text-rp-gold">Sectors</span>
+          <header className="mb-16 animate-fade-up group">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-[1px] w-8 bg-gradient-to-r from-rp-blue to-rp-gold group-hover:w-12 transition-all duration-500" />
+              <span className="text-[10px] font-black uppercase tracking-[0.6em] text-rp-blue group-hover:text-rp-gold transition-colors">Investment & Cooperation</span>
+            </div>
+            <h2 className="text-6xl font-black text-white uppercase tracking-tighter group-hover:text-rp-blue transition-colors">
+              Strategic <span className="text-rp-gold group-hover:text-rp-blue transition-colors">Sectors</span>
             </h2>
-            <p className="text-gray-400 mt-6 max-w-2xl font-medium leading-relaxed">
-              SSGI identifies critical gaps in the regional aerospace landscape. We invite 
-              international industry leaders and research institutions to join these high-impact initiatives.
-            </p>
+            <div className="flex items-center gap-4 mt-6">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                <p className="text-gray-400 font-medium leading-relaxed max-w-2xl group-hover:text-gray-300 transition-colors">
+                  SSGI identifies critical gaps in the regional aerospace landscape. We invite
+                  international industry leaders and research institutions to join these high-impact initiatives.
+                </p>
+              </div>
+              <div className="flex items-center gap-1 px-3 py-1 bg-rp-blue/10 border border-rp-blue/20 rounded-full">
+                <Activity size={10} className="text-rp-blue" />
+                <span className="text-[8px] font-black text-rp-blue uppercase tracking-tighter">4 ACTIVE SECTORS</span>
+              </div>
+            </div>
           </header>
 
           {/* Sector Grid */}
           <div className="grid md:grid-cols-2 gap-8">
-            {SECTORS.map((sector) => (
-              <div key={sector.id} className="glass-panel p-10 rounded-[48px] border border-white/5 hover:border-rp-blue/30 transition-all group relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 text-[10px] font-black text-white/10 group-hover:text-rp-blue/20 transition-colors">
-                  {sector.id}
-                </div>
-                
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <span className={`w-2 h-2 rounded-full ${sector.status === 'High Priority' ? 'bg-rp-gold animate-pulse' : 'bg-rp-blue'}`}></span>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{sector.status}</span>
+            {SECTORS.map((sector) => {
+              const Icon = sector.icon;
+              return (
+                <div key={sector.id} className="glass-panel p-10 rounded-[48px] border border-white/5 hover:border-rp-blue/30 transition-all duration-500 group cursor-pointer hover:scale-[1.02] hover:shadow-2xl hover:shadow-rp-blue/10 relative overflow-hidden">
+                  {/* Ambient Glow Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-rp-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                  <div className="absolute top-0 right-0 p-8 text-[10px] font-black text-white/10 group-hover:text-rp-blue/20 transition-colors">
+                    {sector.id}
                   </div>
 
-                  <div className="space-y-2">
-                    <h3 className="text-3xl font-black text-white group-hover:text-rp-gold transition-colors">{sector.title}</h3>
-                    <p className="text-rp-blue text-xs font-black uppercase tracking-widest">{sector.focus}</p>
-                  </div>
+                  <div className="relative space-y-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-white/5 to-white/10 rounded-2xl flex items-center justify-center border border-white/10 group-hover:border-rp-blue/30 transition-all duration-300 group-hover:scale-110">
+                        <Icon size={20} className={`text-gray-400 group-hover:${sector.color} transition-colors`} />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${sector.status === 'High Priority' ? 'bg-rp-gold animate-pulse' : sector.status === 'Open for Proposals' ? 'bg-rp-blue animate-pulse' : sector.status === 'Strategic Research' ? 'bg-emerald-400 animate-pulse' : 'bg-purple-400 animate-pulse'}`}></span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-gray-400 transition-colors">{sector.status}</span>
+                      </div>
+                    </div>
 
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    {sector.description}
-                  </p>
+                    <div className="space-y-2">
+                      <h3 className="text-3xl font-black text-white group-hover:text-rp-gold transition-colors leading-tight">{sector.title}</h3>
+                      <p className="text-rp-blue text-xs font-black uppercase tracking-widest group-hover:text-rp-gold transition-colors">{sector.focus}</p>
+                    </div>
 
-                  <div className="flex flex-wrap gap-2 pt-4">
-                    {sector.tags.map(tag => (
-                      <span key={tag} className="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[9px] font-black uppercase text-gray-500 group-hover:text-white group-hover:border-white/10 transition-all">
-                        {tag}
+                    <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
+                      {sector.description}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2 pt-4">
+                      {sector.tags.map(tag => (
+                        <span key={tag} className="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[9px] font-black uppercase text-gray-500 group-hover:text-white group-hover:border-white/10 transition-all hover:scale-105">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    <button className="w-full mt-6 py-4 rounded-2xl border border-rp-blue/20 text-rp-blue text-[10px] font-black uppercase tracking-[0.2em] hover:bg-rp-blue hover:text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-rp-blue/20 relative group/btn">
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        Request Technical Brief
+                        <ArrowRight size={12} className="group-hover/btn:translate-x-1 transition-transform" />
                       </span>
-                    ))}
+                    </button>
                   </div>
-
-                  <button className="w-full mt-6 py-4 rounded-2xl border border-rp-blue/20 text-rp-blue text-[10px] font-black uppercase tracking-[0.2em] hover:bg-rp-blue hover:text-white transition-all">
-                    Request Technical Brief
-                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Data Request Section */}
-          <section className="mt-20 p-12 glass-panel rounded-[60px] border border-white/5 flex flex-col lg:flex-row items-center justify-between gap-10">
-            <div className="space-y-4">
-              <h4 className="text-2xl font-black text-white uppercase tracking-tighter">Looking for Raw Data?</h4>
-              <p className="text-gray-400 text-sm max-w-md">Access our open-source geospatial repositories or request high-resolution multispectral imagery for research purposes.</p>
+          <section className="mt-20 p-12 glass-panel rounded-[60px] border border-white/5 flex flex-col lg:flex-row items-center justify-between gap-10 group hover:border-rp-gold/20 transition-all duration-500 hover:scale-[1.01] hover:shadow-2xl hover:shadow-rp-gold/10 relative overflow-hidden">
+            {/* Ambient Glow Effect */}
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-rp-gold/20 rounded-full blur-3xl group-hover:bg-rp-blue/20 transition-colors duration-500"></div>
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-rp-blue/20 rounded-full blur-3xl group-hover:bg-rp-gold/20 transition-colors duration-500"></div>
+
+            <div className="relative z-10 space-y-4">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                <h4 className="text-2xl font-black text-white uppercase tracking-tighter group-hover:text-rp-gold transition-colors">Looking for Raw Data?</h4>
+                <div className="w-3 h-3 bg-rp-gold rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+              </div>
+              <p className="text-gray-400 text-sm max-w-md group-hover:text-gray-300 transition-colors">Access our open-source geospatial repositories or request high-resolution multispectral imagery for research purposes.</p>
+              <div className="flex items-center gap-4 pt-4">
+                <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+                  <FileText size={12} className="text-rp-blue" />
+                  <span className="text-[8px] font-black text-rp-blue uppercase tracking-tighter">OPEN DATA</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+                  <Shield size={12} className="text-emerald-400" />
+                  <span className="text-[8px] font-black text-emerald-400 uppercase tracking-tighter">SECURE ACCESS</span>
+                </div>
+              </div>
             </div>
-            <button className="bg-white text-rp-slate px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-rp-gold hover:text-white transition-all whitespace-nowrap">
-              Access Data Portal
+            <button className="bg-white text-rp-slate px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-rp-gold hover:text-white transition-all whitespace-nowrap hover:scale-105 hover:shadow-lg hover:shadow-rp-gold/20 relative group/btn">
+              <span className="relative z-10 flex items-center gap-2">
+                Access Data Portal
+                <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+              </span>
             </button>
           </section>
         </div>

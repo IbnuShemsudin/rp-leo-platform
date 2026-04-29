@@ -12,6 +12,7 @@ import Registry from './pages/Registry';
 import EARoad from './pages/EARoad';
 import InitiateMoU from './pages/InitiateMoU'; 
 import Opportunities from './pages/Opportunities';
+import Projects from './pages/Projects';
 import GlobalFooter from './components/Footer'; // Import the footer
 import Settings from './pages/Settings';
 
@@ -73,6 +74,12 @@ export default function App() {
                 </ProtectedRoute>
               } />
 
+              <Route path="/projects" element={
+                <ProtectedRoute>
+                  <Projects />
+                </ProtectedRoute>
+              } />
+
               <Route path="/initiate" element={
                 <ProtectedRoute>
                   <InitiateMoU />
@@ -81,9 +88,7 @@ export default function App() {
 
               {/* --- Admin Only Routes --- */}
               <Route path="/register" element={
-                <RoleRoute allowedRoles={['admin']}>
-                  <Register />
-                </RoleRoute>
+                <Register />
               } />
 
               <Route path="/settings" element={

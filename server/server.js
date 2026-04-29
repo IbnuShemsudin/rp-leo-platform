@@ -33,7 +33,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 
 // ✅ 5. Upload Route (NEW)
 app.use('/api/upload', require('./routes/uploadRoutes'));
-
+app.use("/api/notifications", require('./routes/notificationRoutes'));
 // 6. Global Error Handler (Catches malformed JSON or server crashes)
 app.use((err, req, res, next) => {
   console.error('💥 Server Error:', err.stack);
