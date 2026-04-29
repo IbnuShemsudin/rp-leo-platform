@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { Save, User, Lock, ShieldCheck, Activity, Loader2, AlertTriangle, CheckCircle, Crown, Eye, EyeOff, Database, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // 1. Added for navigation
+import { 
+  Save, User, Lock, ShieldCheck, Activity, Loader2, 
+  AlertTriangle, CheckCircle, Crown, Eye, EyeOff, 
+  Database, Zap, ArrowLeft // 2. Added ArrowLeft
+} from 'lucide-react';
 
 export default function Settings() {
-  const { user, token, login } = useAuth(); // Assuming login updates the local user state
+  const { user, token, login } = useAuth();
+  const navigate = useNavigate(); // Initialize navigate
 
   const [form, setForm] = useState({
     name: user?.name || '',
@@ -12,21 +18,20 @@ export default function Settings() {
     confirmPassword: ''
   });
 
-  const [status, setStatus] = useState({ type: '', msg: '' }); // 'success' | 'error'
+  const [status, setStatus] = useState({ type: '', msg: '' });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    if (status.msg) setStatus({ type: '', msg: '' }); // Clear alerts on type
+    if (status.msg) setStatus({ type: '', msg: '' });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // 1. Client-side Validation
     if (form.password && form.password !== form.confirmPassword) {
       setStatus({ type: 'error', msg: 'Encryption Keys do not match.' });
       setLoading(false);
@@ -43,7 +48,7 @@ export default function Settings() {
         body: JSON.stringify({
           name: form.name,
           email: form.email,
-          ...(form.password && { password: form.password }) // Only send password if changed
+          ...(form.password && { password: form.password })
         }),
       });
 
@@ -51,9 +56,8 @@ export default function Settings() {
 
       if (response.ok) {
         setStatus({ type: 'success', msg: 'Terminal configuration updated successfully.' });
-        // Update local auth context with new user data
         login(data.user, token); 
-        setForm({ ...form, password: '', confirmPassword: '' }); // Reset password fields
+        setForm({ ...form, password: '', confirmPassword: '' });
       } else {
         setStatus({ type: 'error', msg: data.msg || 'Update protocol failed.' });
       }
@@ -65,13 +69,14 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#05070a] via-[#0a0c10] to-[#05070a] text-slate-100 p-8 relative overflow-hidden custom-scrollbar">
-      {/* Enhanced Background Ambient Effects */}
+    <div className="min-h-screen bg-gradient-to-br from-[#05070a] via-[#0a0c10] to-[#05070a] text-slate-100 p-8 relative overflow-hidden custom-scrollbar font-sans">
+      
+      {/* Background Ambient Effects */}
       <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-rp-blue/5 rounded-full blur-[140px] pointer-events-none animate-pulse" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-rp-gold/4 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/2 rounded-full blur-[160px] pointer-events-none" />
 
-      {/* Subtle Tech Pattern */}
+      {/* Tech Pattern Overlay */}
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
         <div className="absolute top-[-5%] left-[-5%] w-full h-full border-[0.5px] border-rp-blue/20 rounded-full"></div>
         <div className="absolute top-[15%] right-[-5%] w-2/3 h-2/3 border-[0.5px] border-rp-gold/15 rounded-full"></div>
@@ -79,6 +84,25 @@ export default function Settings() {
       
       <div className="max-w-5xl mx-auto relative z-10 space-y-12">
         
+        {/* TOP NAVIGATION BAR (Added Back Option) */}
+        <div className="flex items-center justify-between">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="group/back flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/10 rounded-full hover:border-rp-blue/40 hover:bg-rp-blue/5 transition-all duration-300"
+          >
+            <div className="p-1 bg-white/5 rounded-full group-hover/back:bg-rp-blue/20 transition-colors">
+              <ArrowLeft size={14} className="group-hover/back:-translate-x-1 transition-transform" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover/back:text-white transition-colors">
+              Return to Command Center
+            </span>
+          </button>
+
+          <div className="text-[10px] font-mono text-gray-600 hidden md:block">
+            STATION_ID: {user?._id?.substring(0, 8) || 'GUEST_NODE'}
+          </div>
+        </div>
+
         {/* Header */}
         <div className="flex flex-col gap-2 group">
           <div className="flex items-center gap-3">

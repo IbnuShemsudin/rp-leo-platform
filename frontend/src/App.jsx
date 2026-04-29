@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 
-// Import your components
+// Page Imports...
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -13,30 +13,31 @@ import EARoad from './pages/EARoad';
 import InitiateMoU from './pages/InitiateMoU'; 
 import Opportunities from './pages/Opportunities';
 import Projects from './pages/Projects';
-import GlobalFooter from './components/Footer'; // Import the footer
+import GlobalFooter from './components/Footer';
 import Settings from './pages/Settings';
 
-// 1. Generic Protection
+// 1. Generic Protection: Just checks if logged in
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth();
   if (!token) return <Navigate to="/login" replace />;
   return children;
 };
 
-// 2. Role-Based Protection
+// 2. Role-Based Protection: Checks specific clearance
 const RoleRoute = ({ children, allowedRoles }) => {
   const { token, user } = useAuth();
   if (!token) return <Navigate to="/login" replace />;
-  if (!allowedRoles.includes(user?.role)) return <Navigate to="/dashboard" replace />;
+  
+  // If role isn't allowed, send them to /settings (safe zone) instead of dashboard
+  if (!allowedRoles.includes(user?.role)) {
+    return <Navigate to="/settings" replace />;
+  }
   return children;
 };
 
-// 3. Footer Wrapper Component
-// This hides the footer on specific high-intensity app pages
 const FooterWrapper = () => {
   const location = useLocation();
-  const hiddenRoutes = ['/dashboard', '/initiate', '/registry'];
-  
+  const hiddenRoutes = ['/dashboard', '/initiate', '/registry', '/projects', '/settings', '/register'];
   if (hiddenRoutes.includes(location.pathname)) return null;
   return <GlobalFooter />;
 };
@@ -45,54 +46,57 @@ export default function App() {
   return (
     <AuthProvider>
       <Router>
-        {/* Global Dark Theme Wrapper */}
         <div className="min-h-screen bg-space-portal text-slate-100 selection:bg-rp-gold selection:text-white transition-colors duration-500 relative flex flex-col">
-          
-          {/* Subtle Global Scanline */}
           <div className="scanline opacity-10 pointer-events-none fixed inset-0 z-0"></div>
 
-          {/* Main Content Area */}
           <div className="flex-grow relative z-10">
             <Routes>
-              {/* --- Public Routes --- */}
+              {/* --- Public Access --- */}
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/volunteer" element={<Volunteer />} />
               <Route path="/opportunities" element={<Opportunities />} />
               <Route path="/ea-road" element={<EARoad />} />
+              <Route path="Register" element={<Register />} />
+              {/* <Route path="/initiate" element={<InitiateMoU />} /> */}
 
-              {/* --- Protected Staff Routes --- */}
+              {/* --- Executive & Admin Territory --- */}
+              {/* Staff are now strictly blocked from these */}
               <Route path="/dashboard" element={
-                <ProtectedRoute>
+                <RoleRoute allowedRoles={['admin', 'executive']}>
                   <Dashboard />
-                </ProtectedRoute>
+                </RoleRoute>
               } />
               
               <Route path="/registry" element={
-                <ProtectedRoute>
+                <RoleRoute allowedRoles={['admin', 'executive']}>
                   <Registry />
-                </ProtectedRoute>
+                </RoleRoute>
               } />
 
               <Route path="/projects" element={
-                <ProtectedRoute>
+                <RoleRoute allowedRoles={['admin', 'executive']}>
                   <Projects />
-                </ProtectedRoute>
+                </RoleRoute>
               } />
 
               <Route path="/initiate" element={
-                <ProtectedRoute>
+                <RoleRoute allowedRoles={['admin', 'executive']}>
                   <InitiateMoU />
-                </ProtectedRoute>
+                </RoleRoute>
               } />
 
-              {/* --- Admin Only Routes --- */}
+              {/* --- Super User Only: Register new nodes --- */}
               <Route path="/register" element={
-                <Register />
+                <RoleRoute allowedRoles={['admin']}>
+                  <Register />
+                </RoleRoute>
               } />
 
+              {/* --- Universal Protected (Staff included) --- */}
               <Route path="/settings" element={
                 <ProtectedRoute>
+                  <InitiateMoU />
                   <Settings />
                 </ProtectedRoute>
               } />
@@ -101,7 +105,6 @@ export default function App() {
             </Routes>
           </div>
 
-          {/* Global Footer stays at the bottom of the stack */}
           <FooterWrapper />
         </div>
       </Router>

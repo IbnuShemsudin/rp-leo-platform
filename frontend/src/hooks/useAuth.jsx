@@ -1,37 +1,43 @@
-import { useState, createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('ssgi_user')));
-  const [token, setToken] = useState(() => localStorage.getItem('ssgi_token'));
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (userData, tokenData) => {
-    localStorage.setItem('ssgi_token', tokenData);
-    localStorage.setItem('ssgi_user', JSON.stringify(userData));
-    setToken(tokenData);
+  useEffect(() => {
+    // Check if user is already logged in on page load
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    
+    if (storedToken && storedUser) {
+      setToken(storedToken);
+      setUser(JSON.parse(storedUser));
+    }
+    setLoading(false);
+  }, []);
+
+  const login = (userData, userToken) => {
+    localStorage.setItem('token', userToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setToken(userToken);
     setUser(userData);
   };
 
   const logout = () => {
-    localStorage.removeItem('ssgi_token');
-    localStorage.removeItem('ssgi_user');
-    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
+    setUser(null);
   };
 
-  // Helper to check permissions globally
-  const isExecutive = user?.role === 'executive' || user?.role === 'admin';
-
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isExecutive }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within an AuthProvider");
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);

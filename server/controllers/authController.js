@@ -10,8 +10,8 @@ You can move these to .env later for better security
 */
 
 const ROLE_SECRET_CODES = {
-  admin: process.env.ADMIN_SECRET_CODE,
-  executive: process.env.EXECUTIVE_SECRET_CODE,
+  admin: String(process.env.ADMIN_SECRET_CODE || "").trim(),
+  executive: String(process.env.EXECUTIVE_SECRET_CODE || "").trim(),
   staff: ""
 };
 
