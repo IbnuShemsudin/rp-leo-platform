@@ -1,57 +1,126 @@
 import React, { useState, useRef } from 'react';
 
-export default function UploadFile({ onUploadSuccess, uploadType = 'mous' }) {
+const API =
+  import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+export default function UploadFile({
+  onUploadSuccess,
+  uploadType = 'mous'
+}) {
   const [file, setFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [uploadError, setUploadError] = useState('');
+
   const fileInputRef = useRef(null);
 
-  // FIX 1: Access the first item to get the actual File binary
   const handleFileChange = (e) => {
-  const selectedFiles = e.target.files;
-  if (selectedFiles && selectedFiles.length > 0) {
-    setFile(selectedFiles[0]); // ✅ FIX
-  }
-};
+    const selectedFiles = e.target.files;
+
+    if (selectedFiles && selectedFiles.length > 0) {
+      setUploadError('');
+      setFile(selectedFiles[0]);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      setUploadError('');
+      setFile(e.dataTransfer.files[0]);
+    }
+  };
 
   const uploadFile = async () => {
     if (!file) return;
+
     setUploading(true);
-    
+    setUploadError('');
+    setProgress(0);
+
     const formData = new FormData();
-    // This now sends the binary file correctly
     formData.append('file', file);
-    formData.append('type', uploadType); 
+    formData.append('type', uploadType);
+
+    let interval;
 
     try {
-      const interval = setInterval(() => {
-        setProgress(prev => (prev < 90 ? prev + 10 : prev));
-      }, 100);
+      // fake progress animation
+      interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 90) return 90;
+          return prev + 10;
+        });
+      }, 150);
 
-      const response = await fetch('http://localhost:5000/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await fetch(
+        `${API}/api/upload/pdf`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error("Non-JSON Response:", text);
+        throw new Error("Server returned invalid response. Check backend.");
+      }
 
       const data = await response.json();
-      
-      if (response.ok) {
-        clearInterval(interval);
-        setProgress(100);
-        setTimeout(() => {
-          const uploadedName = data.file?.filename || data.file || data.filename;
-          onUploadSuccess(uploadedName);
-          setUploading(false);
-          setFile(null);
-          setProgress(0);
-        }, 500);
-      } else {
-        throw new Error(data.message || "Upload failed");
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.msg || data.message || "Upload failed");
       }
+
+      clearInterval(interval);
+      setProgress(100);
+
+      setTimeout(() => {
+        // ✅ FIXED: safer extraction
+        const filename =
+          data.file?.filename ||
+          data.file?.name ||
+          data.filename ||
+          file.name;
+
+        // URL for preview/download
+        const fileUrl =
+          data.file?.url ||
+          data.url ||
+          `${API}/uploads/${filename}`;
+
+        console.log("✅ Uploaded File:", { filename, url: fileUrl });
+
+        // ✅ IMPORTANT FIX: send object (NOT string)
+        onUploadSuccess({
+          filename,
+          url: fileUrl
+        });
+
+        setUploading(false);
+        setFile(null);
+        setProgress(0);
+
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }, 500);
+
     } catch (err) {
-      console.error("Uplink Error:", err);
-      alert("Uplink Interrupted: " + err.message);
+      console.error("🚨 Upload Error:", err);
+
+      clearInterval(interval);
+
+      setUploadError(err.message);
+
+      alert("Upload failed: " + err.message);
+
       setUploading(false);
       setProgress(0);
     }
@@ -59,86 +128,101 @@ export default function UploadFile({ onUploadSuccess, uploadType = 'mous' }) {
 
   return (
     <div className="w-full space-y-4">
-      <div 
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={(e) => {
+
+      {uploadError && (
+        <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4">
+          <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest">
+            🚨 {uploadError}
+          </p>
+        </div>
+      )}
+
+      <div
+        onDragOver={(e) => {
           e.preventDefault();
-          setIsDragging(false);
-          // FIX 2: Again, grab the first file from the drop event
-          if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            setFile(e.dataTransfer.files[0]); // ✅ FIX
-          }
+          setIsDragging(true);
         }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={handleDrop}
         className={`relative group border-2 border-dashed rounded-[32px] p-10 transition-all duration-500 flex flex-col items-center justify-center gap-4 overflow-hidden ${
-          isDragging ? 'border-rp-blue bg-rp-blue/10 scale-[1.02]' : 'border-white/10 bg-white/5 hover:border-white/20'
+          isDragging
+            ? 'border-rp-blue bg-rp-blue/10 scale-[1.02]'
+            : 'border-white/10 bg-white/5 hover:border-white/20'
         }`}
       >
-        <div className="absolute inset-0 bg-rp-blue/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
-        <input 
-          type="file" 
+        <input
+          type="file"
           ref={fileInputRef}
           onChange={handleFileChange}
-          className="hidden" 
-          accept=".pdf,.doc,.docx,.jpg,.png"
+          className="hidden"
+          accept=".pdf"
         />
 
         {!file ? (
           <>
-            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-2xl">
-              📂
-            </div>
-            <div className="text-center space-y-1">
-              <p className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Drop Document Here</p>
-              <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">or click to browse local drive</p>
-            </div>
-            <button 
+            <div className="text-3xl">📂</div>
+
+            <p className="text-[10px] font-black text-white uppercase tracking-widest">
+              Drop PDF or Click to Upload
+            </p>
+
+            <button
               type="button"
               onClick={() => fileInputRef.current.click()}
-              className="mt-2 px-6 py-2 rounded-xl bg-white/5 border border-white/10 text-[9px] font-black text-white uppercase tracking-widest hover:bg-white/10 transition-all"
+              className="px-6 py-2 bg-white/5 border border-white/10 text-[9px] font-black uppercase rounded-xl"
             >
               Select File
             </button>
           </>
         ) : (
-          <div className="animate-in zoom-in duration-300 flex flex-col items-center gap-4 w-full">
-            <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 w-full">
-              <div className="text-2xl">📄</div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-black text-white truncate uppercase tracking-widest">{file.name}</p>
-                <p className="text-[8px] font-bold text-rp-gold uppercase">
-                  {(file.size / (1024 * 1024)).toFixed(2)} MB
+          <div className="w-full space-y-4">
+
+            <div className="flex items-center justify-between bg-white/5 p-4 rounded-2xl">
+              <div>
+                <p className="text-white text-[10px] font-black uppercase">
+                  {file.name}
+                </p>
+                <p className="text-[8px] text-rp-gold">
+                  {(file.size / 1024 / 1024).toFixed(2)} MB
                 </p>
               </div>
-              <button 
+
+              <button
                 type="button"
-                onClick={() => setFile(null)}
-                className="text-gray-500 hover:text-rose-500 transition-colors px-2"
+                onClick={() => {
+                  setFile(null);
+                  setUploadError('');
+                }}
+                className="text-rose-400"
               >
                 ✕
               </button>
             </div>
 
             {uploading ? (
-              <div className="w-full space-y-2">
-                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-rp-blue transition-all duration-300" 
+              <div>
+                <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-rp-blue transition-all"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <p className="text-[8px] font-black text-rp-blue uppercase tracking-widest text-center">Encrypting & Uploading... {progress}%</p>
+
+                <p className="text-[8px] text-center text-rp-blue font-black mt-2">
+                  Uploading... {progress}%
+                </p>
               </div>
             ) : (
-              <button 
+              <button
                 type="button"
                 onClick={uploadFile}
-                className="w-full py-4 bg-rp-blue text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-900/40 hover:scale-[1.02] active:scale-95 transition-all"
+                className="w-full py-4 bg-rp-blue text-white rounded-2xl font-black uppercase text-[10px]"
               >
-                Initiate Data Uplink
+                Upload Document
               </button>
             )}
+
           </div>
         )}
       </div>

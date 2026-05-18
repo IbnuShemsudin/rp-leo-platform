@@ -1,28 +1,81 @@
-const express = require("express");
+import express from "express";
+import multer from "multer";
+import path from "path";
+
 const router = express.Router();
-const upload = require("../middleware/upload"); // Ensure this path is correct
 
-// This defines the endpoint: POST http://localhost:5000/api/upload/
-router.post("/", upload.single("file"), (req, res) => {
-  try {
-    // 1. Check if the file was actually uploaded by Multer
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uplinked. Check field name." });
-    }
+/*
+========================
+ MULTER STORAGE
+========================
+*/
 
-    // 2. Send back the file data to the frontend
-    res.json({
-      message: "File uploaded successfully",
-      file: {
-        filename: req.file.filename,
-        path: req.file.path,
-        size: req.file.size
-      }
-    });
-  } catch (error) {
-    console.error("Upload Route Error:", error);
-    res.status(500).json({ message: "Server error during upload processing" });
-  }
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+
+  filename: (req, file, cb) => {
+    const uniqueName =
+      Date.now() +
+      "-" +
+      file.originalname.replace(/\s+/g, "-");
+
+    cb(null, uniqueName);
+  },
 });
 
-module.exports = router;
+const upload = multer({
+  storage,
+
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype !== "application/pdf") {
+      return cb(new Error("Only PDF files allowed"));
+    }
+
+    cb(null, true);
+  },
+});
+
+/*
+========================
+ UPLOAD ROUTE
+========================
+*/
+
+router.post(
+  "/pdf",
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          msg: "No file uploaded",
+        });
+      }
+
+      console.log("📄 Uploaded File:", req.file);
+
+      res.json({
+        success: true,
+
+        file: {
+          filename: req.file.filename,
+          originalname: req.file.originalname,
+          path: req.file.path,
+          url: `/uploads/${req.file.filename}`,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        success: false,
+        msg: error.message,
+      });
+    }
+  }
+);
+
+export default router;

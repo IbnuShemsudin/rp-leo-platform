@@ -1,8 +1,6 @@
-// server/controllers/authController.js
-
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { supabase } from "../config/supabase.js";
 
 /*
 ROLE SECRET CODES
@@ -12,7 +10,7 @@ You can move these to .env later for better security
 const ROLE_SECRET_CODES = {
   admin: String(process.env.ADMIN_SECRET_CODE || "").trim(),
   executive: String(process.env.EXECUTIVE_SECRET_CODE || "").trim(),
-  staff: ""
+  staff: "",
 };
 
 /*
@@ -20,29 +18,37 @@ REGISTER USER
 POST /api/auth/register
 */
 
-exports.registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   try {
     const {
       name,
       email,
       password,
       role,
-      secretCode
+      secretCode,
     } = req.body;
 
     // Validation
     if (!name || !email || !password || !role) {
       return res.status(400).json({
-        msg: "Please provide all required fields"
+        msg: "Please provide all required fields",
       });
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    /*
+    CHECK IF USER EXISTS
+    */
+
+    const { data: existingUser, error: existingError } =
+      await supabase
+        .from("users")
+        .select("*")
+        .eq("email", email)
+        .single();
 
     if (existingUser) {
       return res.status(400).json({
-        msg: "User already exists"
+        msg: "User already exists",
       });
     }
 
@@ -56,32 +62,54 @@ exports.registerUser = async (req, res) => {
 
       if (!secretCode || secretCode !== requiredCode) {
         return res.status(403).json({
-          msg: `Invalid secret code for ${role}`
+          msg: `Invalid secret code for ${role}`,
         });
       }
     }
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      role
-    });
+    const hashedPassword = await bcrypt.hash(
+      password,
+      salt
+    );
+
+    /*
+    CREATE USER
+    */
+
+    const { data: user, error: createError } =
+      await supabase
+        .from("users")
+        .insert([
+          {
+            name,
+            email,
+            password: hashedPassword,
+            role,
+          },
+        ])
+        .select()
+        .single();
+
+    if (createError) {
+      console.error("Create User Error:", createError);
+
+      return res.status(500).json({
+        msg: createError.message,
+      });
+    }
 
     // Generate token
     const token = jwt.sign(
       {
-        id: user._id,
-        role: user.role
+        id: user.id,
+        role: user.role,
       },
       process.env.JWT_SECRET || "supersecretkey",
       {
-        expiresIn: "7d"
+        expiresIn: "7d",
       }
     );
 
@@ -89,18 +117,17 @@ exports.registerUser = async (req, res) => {
       msg: "Registration successful",
       token,
       user: {
-        _id: user._id,
+        _id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
-
   } catch (error) {
     console.error("Register Error:", error);
 
     res.status(500).json({
-      msg: "Server error during registration"
+      msg: "Server error during registration",
     });
   }
 };
@@ -110,26 +137,35 @@ LOGIN USER
 POST /api/auth/login
 */
 
-exports.loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   try {
-    const {
-      email,
-      password
-    } = req.body;
+    const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
-        msg: "Please provide email and password"
+        msg: "Please provide email and password",
       });
     }
 
-    const user = await User.findOne({ email });
+    /*
+    FIND USER
+    */
+
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email)
+      .single();
 
     if (!user) {
       return res.status(400).json({
-        msg: "Invalid credentials"
+        msg: "Invalid credentials",
       });
     }
+
+    /*
+    CHECK PASSWORD
+    */
 
     const isMatch = await bcrypt.compare(
       password,
@@ -138,18 +174,22 @@ exports.loginUser = async (req, res) => {
 
     if (!isMatch) {
       return res.status(400).json({
-        msg: "Invalid credentials"
+        msg: "Invalid credentials",
       });
     }
 
+    /*
+    GENERATE TOKEN
+    */
+
     const token = jwt.sign(
       {
-        id: user._id,
-        role: user.role
+        id: user.id,
+        role: user.role,
       },
       process.env.JWT_SECRET || "supersecretkey",
       {
-        expiresIn: "7d"
+        expiresIn: "7d",
       }
     );
 
@@ -157,18 +197,17 @@ exports.loginUser = async (req, res) => {
       msg: "Login successful",
       token,
       user: {
-        _id: user._id,
+        _id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
-
   } catch (error) {
     console.error("Login Error:", error);
 
     res.status(500).json({
-      msg: "Server error during login"
+      msg: "Server error during login",
     });
   }
 };

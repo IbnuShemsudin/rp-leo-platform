@@ -1,24 +1,34 @@
-// server/middleware/auth.js
-const jwt = require('jsonwebtoken');
+import jwt from "jsonwebtoken";
 
-module.exports = function(req, res, next) {
-  // Get token from header
-  const token = req.header('x-auth-token');
-
-  // Check if no token
-  if (!token) {
-    return res.status(401).json({ msg: 'No token, authorization denied' });
-  }
-
+const auth = (req, res, next) => {
   try {
+    // Get token from header
+    const token = req.header("x-auth-token");
+
+    // Check if no token
+    if (!token) {
+      return res.status(401).json({
+        msg: "No token, authorization denied",
+      });
+    }
+
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "supersecretkey"
+    );
+
     // Add user from payload to request
-    req.user = decoded; 
+    req.user = decoded;
+
     next();
   } catch (err) {
-    // 401 is the standard for "Invalid Credentials/Token"
-    res.status(401).json({ msg: 'Token is not valid or has expired' });
+    console.error("Auth Error:", err.message);
+
+    return res.status(401).json({
+      msg: "Token is not valid or has expired",
+    });
   }
 };
+
+export default auth;

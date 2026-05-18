@@ -1,17 +1,29 @@
-const express = require("express");
+import express from "express";
+import { supabase } from "../config/supabase.js";
+
 const router = express.Router();
-const Notification = require("../models/Notification");
 
 /*
 GET notifications
 */
+
 router.get("/", async (req, res) => {
   try {
-    const notifications = await Notification.find()
-      .sort({ createdAt: -1 })
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .order("created_at", {
+        ascending: false,
+      })
       .limit(20);
 
-    res.json(notifications);
+    if (error) {
+      return res.status(500).json({
+        message: "Failed to fetch notifications",
+      });
+    }
+
+    res.json(data);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -23,19 +35,38 @@ router.get("/", async (req, res) => {
 /*
 CREATE notification
 */
+
 router.post("/", async (req, res) => {
   try {
-    const { title, message, type, role, link } = req.body;
-
-    const notification = await Notification.create({
+    const {
       title,
       message,
       type,
       role,
       link,
-    });
+    } = req.body;
 
-    res.status(201).json(notification);
+    const { data, error } = await supabase
+      .from("notifications")
+      .insert([
+        {
+          title,
+          message,
+          type,
+          role,
+          link,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      return res.status(500).json({
+        message: "Failed to create notification",
+      });
+    }
+
+    res.status(201).json(data);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -44,4 +75,4 @@ router.post("/", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

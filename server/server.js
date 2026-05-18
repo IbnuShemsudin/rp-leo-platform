@@ -1,53 +1,198 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const connectDB = require('./config/db');
-const morgan = require('morgan'); // Recommended: For logging requests
-const path = require('path'); // ✅ Added for file uploads
+import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
+import cors from "cors";
+import morgan from "morgan";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+
+// Routes
+import mouRoutes from "./routes/mouRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+
+// Fix __dirname in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// 1. Database Connection
-connectDB();
+/*
+========================
+ ENSURE UPLOADS FOLDER EXISTS
+========================
+*/
 
-// 2. Global Middleware
-app.use(cors()); // Allows your React frontend (port 5173) to talk to this server
-app.use(express.json({ limit: '10mb' })); // Increased limit for potential document uploads
-app.use(morgan('dev')); // Logs every request to the terminal (e.g., "POST /api/auth/login 400")
+const uploadsPath = path.join(__dirname, "uploads");
 
-// ✅ 3. Static Uploads Folder (NEW)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+if (!fs.existsSync(uploadsPath)) {
+  fs.mkdirSync(uploadsPath, { recursive: true });
+  console.log("📁 uploads folder created");
+}
 
-// 3. Health Check Route (Great for testing if the server is alive)
-app.get('/status', (req, res) => {
-  res.json({ 
-    status: 'Operational', 
+/*
+========================
+ MIDDLEWARE
+========================
+*/
+
+app.use(cors());
+
+app.use(
+  express.json({
+    limit: "10mb",
+  })
+);
+
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
+
+app.use(morgan("dev"));
+
+/*
+========================
+ STATIC FILES
+========================
+*/
+
+app.use(
+  "/uploads",
+  express.static(uploadsPath)
+);
+
+/*
+========================
+ DEBUG ROUTES
+========================
+*/
+
+app.get("/uploads-check", (req, res) => {
+  try {
+    const files = fs.readdirSync(uploadsPath);
+
+    res.json({
+      success: true,
+      uploadsFolder: uploadsPath,
+      totalFiles: files.length,
+      files,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/*
+========================
+ HEALTH CHECK
+========================
+*/
+
+app.get("/status", (req, res) => {
+  res.json({
+    status: "Operational",
     timestamp: new Date().toISOString(),
-    system: 'SSGI RP-LEO Backend'
+    system: "SSGI RP-LEO Backend",
   });
 });
 
-// 4. API Routes
-app.use('/api/mou', require('./routes/mouRoutes'));
-app.use('/api/auth', require('./routes/authRoutes'));
+/*
+========================
+ API ROUTES
+========================
+*/
 
-// ✅ 5. Upload Route (NEW)
-app.use('/api/upload', require('./routes/uploadRoutes'));
-app.use("/api/notifications", require('./routes/notificationRoutes'));
-// 6. Global Error Handler (Catches malformed JSON or server crashes)
+app.use("/api/mou", mouRoutes);
+
+app.use("/api/auth", authRoutes);
+
+app.use("/api/upload", uploadRoutes);
+
+app.use("/api/notifications", notificationRoutes);
+
+/*
+========================
+ TEST PDF ROUTE
+========================
+*/
+
+app.get("/test-pdf/:file", (req, res) => {
+  const filePath = path.join(
+    uploadsPath,
+    req.params.file
+  );
+
+  console.log("📄 Checking file:", filePath);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({
+      success: false,
+      msg: "PDF not found",
+      searched: filePath,
+    });
+  }
+
+  res.sendFile(filePath);
+});
+
+/*
+========================
+ 404 HANDLER
+========================
+*/
+
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    msg: `Route not found: ${req.originalUrl}`,
+  });
+});
+
+/*
+========================
+ GLOBAL ERROR HANDLER
+========================
+*/
+
 app.use((err, req, res, next) => {
-  console.error('💥 Server Error:', err.stack);
-  res.status(500).json({ 
-    msg: 'Internal Server Error', 
-    error: process.env.NODE_ENV === 'development' ? err.message : {} 
+  console.error("💥 Server Error:", err.stack);
+
+  res.status(500).json({
+    success: false,
+    msg: "Internal Server Error",
+    error:
+      process.env.NODE_ENV === "development"
+        ? err.message
+        : {},
   });
 });
+
+/*
+========================
+ START SERVER
+========================
+*/
 
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`-----------------------------------------`);
+  console.log("-----------------------------------------");
   console.log(`🚀 RP-LEO Server running on port ${PORT}`);
-  console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📁 Uploads: http://localhost:${PORT}/uploads`);
-  console.log(`-----------------------------------------`);
+  console.log(
+    `📡 Environment: ${
+      process.env.NODE_ENV || "development"
+    }`
+  );
+  console.log(`📂 Uploads Path: ${uploadsPath}`);
+  console.log(`🌐 Upload URL: http://localhost:${PORT}/uploads`);
+  console.log("-----------------------------------------");
 });
