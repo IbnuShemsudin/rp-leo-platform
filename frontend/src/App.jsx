@@ -15,7 +15,7 @@ import Opportunities from './pages/Opportunities';
 import Projects from './pages/Projects';
 import GlobalFooter from './components/Footer';
 import Settings from './pages/Settings';
-
+import Messages from "./pages/Messages";
 // 1. Generic Protection: Just checks if logged in
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth();
@@ -58,6 +58,10 @@ export default function App() {
               <Route path="/opportunities" element={<Opportunities />} />
               <Route path="/ea-road" element={<EARoad />} />
               <Route path="Register" element={<Register />} />
+              <Route
+                     path="/messages/:mouId"
+                     element={<Messages />}
+                    />
               {/* <Route path="/initiate" element={<InitiateMoU />} /> */}
 
               {/* --- Executive & Admin Territory --- */}

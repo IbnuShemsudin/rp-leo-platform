@@ -13,6 +13,9 @@ import mouRoutes from "./routes/mouRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import messageRoutes from "./routes/messages.js";
+import inboxRoutes from "./routes/inbox.js";
+
 
 // Fix __dirname in ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -118,6 +121,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
 
 app.use("/api/notifications", notificationRoutes);
+
+app.use("/api/messages", messageRoutes);
+
+app.use("/api/inbox", inboxRoutes);
+
 
 /*
 ========================

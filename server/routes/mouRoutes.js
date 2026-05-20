@@ -13,6 +13,7 @@ const router = express.Router();
 router.post("/register", auth, async (req, res) => {
   try {
     console.log("🔥 Incoming MoU Body:", req.body);
+    console.log("👤 AUTH USER:", req.user);
 
     const data = req.body;
 
@@ -36,7 +37,15 @@ router.post("/register", auth, async (req, res) => {
       current_step: data.currentStep || 1,
       date_initiated: data.dateInitiated,
 
+      // IMPORTANT
       created_by: req.user?.id || null,
+
+      // EXTRA TRACKING
+      created_by_name: req.user?.name || "Unknown User",
+      created_by_email: req.user?.email || null,
+      created_by_role: req.user?.role || "partner",
+
+      created_at: new Date().toISOString(),
     };
 
     console.log("🚀 Payload To Supabase:", payload);
@@ -56,6 +65,8 @@ router.post("/register", auth, async (req, res) => {
       });
     }
 
+    console.log("✅ MOU CREATED:", result);
+
     return res.status(201).json({
       success: true,
       message: "MoU Registered Successfully",
@@ -74,12 +85,103 @@ router.post("/register", auth, async (req, res) => {
 
 /*
 =================================================
+ GET MY MOUs
+=================================================
+ IMPORTANT FIX
+ This is why inbox was empty
+=================================================
+*/
+
+router.get("/my-mous", auth, async (req, res) => {
+  try {
+    console.log("📥 FETCH MY MOUS");
+    console.log("👤 USER:", req.user);
+
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const { data, error } = await supabase
+      .from("mous")
+      .select("*")
+      .eq("created_by", userId)
+      .order("created_at", {
+        ascending: false,
+      });
+
+    if (error) {
+      console.error("❌ MY MOUS ERROR:", error);
+
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    console.log("✅ MY MOUS:", data?.length || 0);
+
+    return res.json(data || []);
+
+  } catch (err) {
+    console.error("💥 MY MOUS CRASH:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+/*
+=================================================
+ GET SINGLE MOU
+=================================================
+*/
+
+router.get("/:id", auth, async (req, res) => {
+  try {
+
+    const { data, error } = await supabase
+      .from("mous")
+      .select("*")
+      .eq("id", req.params.id)
+      .single();
+
+    if (error) {
+      console.error("❌ SINGLE FETCH ERROR:", error);
+
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.json(data);
+
+  } catch (err) {
+    console.error("💥 SINGLE FETCH CRASH:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+/*
+=================================================
  UPDATE MOUs (ADMIN / EXECUTIVE ONLY)
 =================================================
 */
 
 router.put("/update/:id", auth, async (req, res) => {
   try {
+
     if (!["admin", "executive"].includes(req.user.role)) {
       return res.status(403).json({
         msg: "Access Denied: Insufficient Permissions",
@@ -88,13 +190,16 @@ router.put("/update/:id", auth, async (req, res) => {
 
     const { status, currentStep } = req.body;
 
+    const updatePayload = {
+      status,
+      current_step: currentStep,
+      last_modified_by: req.user.id,
+      updated_at: new Date().toISOString(),
+    };
+
     const { data, error } = await supabase
       .from("mous")
-      .update({
-        status,
-        current_step: currentStep,
-        last_modified_by: req.user.id,
-      })
+      .update(updatePayload)
       .eq("id", req.params.id)
       .select()
       .single();
@@ -106,6 +211,8 @@ router.put("/update/:id", auth, async (req, res) => {
         msg: error.message || "MoU not found",
       });
     }
+
+    console.log("✅ MOU UPDATED:", data);
 
     return res.json({
       success: true,
@@ -130,6 +237,7 @@ router.put("/update/:id", auth, async (req, res) => {
 
 router.patch("/sign/:id", auth, async (req, res) => {
   try {
+
     if (
       req.user.role !== "executive" &&
       req.user.role !== "admin"
@@ -145,6 +253,7 @@ router.patch("/sign/:id", auth, async (req, res) => {
         status: "Active",
         current_step: 7,
         signing_date: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
       .eq("id", req.params.id)
       .select()
@@ -158,6 +267,8 @@ router.patch("/sign/:id", auth, async (req, res) => {
         error: error.message,
       });
     }
+
+    console.log("✅ SIGNED:", data);
 
     return res.json({
       success: true,
@@ -182,6 +293,7 @@ router.patch("/sign/:id", auth, async (req, res) => {
 
 router.get("/all", auth, async (req, res) => {
   try {
+
     const { data, error } = await supabase
       .from("mous")
       .select("*")
@@ -198,7 +310,7 @@ router.get("/all", auth, async (req, res) => {
       });
     }
 
-    return res.json(data);
+    return res.json(data || []);
 
   } catch (err) {
     console.error("💥 FETCH CRASH:", err);
@@ -218,6 +330,7 @@ router.get("/all", auth, async (req, res) => {
 
 router.delete("/:id", auth, async (req, res) => {
   try {
+
     if (req.user.role !== "admin") {
       return res.status(403).json({
         msg: "Only System Admins can delete records",

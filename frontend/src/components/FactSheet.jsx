@@ -33,23 +33,52 @@ export default function FactSheet({
   const [iframeError, setIframeError] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
-  // SUPPORT ALL POSSIBLE FILE FIELDS (include nested shapes)
+  const getField = (...keys) => {
+    for (const key of keys) {
+      if (mou[key] != null && mou[key] !== '') return mou[key];
+    }
+    return null;
+  };
+
+  // SUPPORT ALL POSSIBLE FILE FIELDS (include snake_case from Supabase)
+  const uploadUrl = mou.upload?.url || mou.upload?.path || null;
+  const rawFile = getField(
+    'fileUrl',
+    'file_url',
+    'documentUrl',
+    'document_url',
+    'document',
+    'pdf',
+    'pdfUrl',
+    'pdf_url',
+    'uploadedFile',
+    'initialDocumentUrl',
+    'initial_document_url',
+    'signedDocumentUrl',
+    'signed_document_url',
+    'file',
+    'filePath',
+    'file_path',
+    'path'
+  );
   const fileUrl =
-    mou.fileUrl ||
-    mou.documentUrl ||
-    mou.document ||
-    mou.pdf ||
-    mou.pdfUrl ||
-    mou.uploadedFile ||
-    mou.initialDocumentUrl ||
-    mou.signedDocumentUrl ||
-    mou.file?.url ||
-    mou.file ||
-    mou.upload?.url ||
-    mou.upload?.path ||
-    mou.filePath ||
-    mou.path ||
-    null;
+    typeof rawFile === 'string'
+      ? rawFile
+      : rawFile?.url || rawFile?.path || uploadUrl;
+
+  const contactPerson = getField('contactPerson', 'contact_person', 'contact_name');
+  const contactEmail = getField('contactEmail', 'contact_email');
+  const contactPhone = getField('contactPhone', 'contact_phone', 'phone', 'phone_number');
+  const createdByName = getField('createdBy', 'created_by');
+  const createdAtDate = getField('createdAt', 'created_at');
+  const partnerName = getField('partnerName', 'partner_name');
+  const country = getField('country');
+  const sector = getField('sector');
+  const status = getField('status');
+  const fundingType = getField('fundingType', 'funding_type');
+  const currentStep = getField('currentStep', 'current_step') || 1;
+  const objectives = getField('objectives');
+  const description = getField('description');
 
   // helpers
   const isRemoteUrl = (u) => typeof u === 'string' && /^https?:\/\//i.test(u);
@@ -81,7 +110,7 @@ export default function FactSheet({
           const blob = await res.blob();
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
-          const name = (mou.partnerName || 'mou').replace(/[^a-z0-9-_]/gi, '_') + '.pdf';
+          const name = (partnerName || 'mou').replace(/[^a-z0-9-_]/gi, '_') + '.pdf';
           a.href = url;
           a.download = name;
           document.body.appendChild(a);
@@ -110,11 +139,11 @@ export default function FactSheet({
     };
 
     const printWindow = window.open('', '_blank');
-    const partner = escapeHtml(mou.partnerName || 'Unknown Partner');
-    const country = escapeHtml(mou.country || 'Unknown');
-    const status = escapeHtml(mou.status || 'Unknown');
-    const sector = escapeHtml(mou.sector || 'N/A');
-    const objectives = escapeHtml(mou.objectives || 'No objectives provided.');
+    const partner = escapeHtml(partnerName || 'Unknown Partner');
+    const country = escapeHtml(country || 'Unknown');
+    const status = escapeHtml(status || 'Unknown');
+    const sector = escapeHtml(sector || 'N/A');
+    const objectives = escapeHtml(objectives || 'No objectives provided.');
 
     printWindow.document.write(`
       <html>
@@ -225,7 +254,7 @@ export default function FactSheet({
           <StatusField
             icon={<Award size={14} className="text-rp-blue" />}
             label="Legal Status"
-            value={mou.status?.toUpperCase()}
+            value={status?.toUpperCase()}
             color="text-rp-blue"
           />
 
@@ -254,28 +283,28 @@ export default function FactSheet({
         <div className="col-span-2">
           <DetailItem
             label="Primary Partner Institution"
-            value={mou.partnerName}
+            value={partnerName}
           />
         </div>
 
         <div>
           <DetailItem
             label="Host Jurisdiction"
-            value={mou.country}
+            value={country}
           />
         </div>
 
         <div>
           <DetailItem
             label="Funding Framework"
-            value={mou.fundingType || "Non-Governmental / Private"}
+            value={fundingType || "Non-Governmental / Private"}
           />
         </div>
 
         <div>
           <DetailItem
             label="Operational Step"
-            value={`Phase ${mou.currentStep || 1} of 10`}
+            value={`Phase ${currentStep || 1} of 10`}
           />
         </div>
 
@@ -300,46 +329,50 @@ export default function FactSheet({
           <DetailItem
             icon={<User size={16} />}
             label="Contact Person"
-            value={mou.contactPerson || "Not Provided"}
+            value={contactPerson || "Not Provided"}
           />
 
           <DetailItem
             icon={<Phone size={16} />}
             label="Phone Number"
-            value={mou.phone || mou.contactPhone || "Not Provided"}
+            value={contactPhone || "Not Provided"}
           />
 
           <DetailItem
             icon={<Mail size={16} />}
             label="Email Address"
-            value={mou.contactEmail || "Not Provided"}
+            value={contactEmail || "Not Provided"}
           />
 
           <DetailItem
             icon={<Building2 size={16} />}
             label="Sector"
-            value={mou.sector || "Not Specified"}
+            value={sector || "Not Specified"}
           />
 
           <DetailItem
             icon={<Clock size={16} />}
             label="Submission Date"
             value={
-              mou.createdAt
-                ? new Date(mou.createdAt).toLocaleString()
+              createdAtDate
+                ? new Date(createdAtDate).toLocaleString()
                 : "Unknown"
             }
           />
 
           <DetailItem
             label="Submitted By"
-            value={mou.createdBy?.name || "Unknown User"}
+            value={
+              typeof createdByName === 'object'
+                ? createdByName.name || createdByName.id || 'Unknown User'
+                : createdByName || 'Unknown User'
+            }
           />
 
           <div className="col-span-2">
             <DetailItem
               label="Description"
-              value={mou.description || "No description provided"}
+              value={description || "No description provided"}
             />
           </div>
 
@@ -454,7 +487,7 @@ export default function FactSheet({
 
           <p className="text-[13px] font-serif leading-relaxed text-slate-700 italic">
             "
-            {mou.objectives ||
+            {objectives ||
               "The specific collaborative frameworks, technical requirements, and strategic goals for this partnership are pending final administrative validation."
             }
             "
@@ -483,7 +516,7 @@ export default function FactSheet({
 
             <div className="flex gap-4 flex-wrap">
 
-              {mou.status === "Draft" && (
+              {status === "Draft" && (
                 <button
                   onClick={() => onApprove?.("Pending Validation")}
                   disabled={approving}
@@ -493,7 +526,7 @@ export default function FactSheet({
                 </button>
               )}
 
-              {mou.status === "Pending Validation" && (
+              {status === "Pending Validation" && (
                 <button
                   onClick={() => onApprove?.("Signed")}
                   disabled={approving}
