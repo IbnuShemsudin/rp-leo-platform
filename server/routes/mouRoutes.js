@@ -85,10 +85,48 @@ router.post("/register", auth, async (req, res) => {
 
 /*
 =================================================
- GET MY MOUs
+ GET ALL MOUs
+ IMPORTANT:
+ MUST COME BEFORE /:id
 =================================================
- IMPORTANT FIX
- This is why inbox was empty
+*/
+
+router.get("/all", auth, async (req, res) => {
+  try {
+
+    const { data, error } = await supabase
+      .from("mous")
+      .select("*")
+      .order("updated_at", {
+        ascending: false,
+      });
+
+    if (error) {
+      console.error("❌ FETCH ERROR:", error);
+
+      return res.status(500).json({
+        message: "Error fetching registry",
+        error: error.message,
+      });
+    }
+
+    return res.json(data || []);
+
+  } catch (err) {
+    console.error("💥 FETCH CRASH:", err);
+
+    return res.status(500).json({
+      message: "Error fetching registry",
+      error: err.message,
+    });
+  }
+});
+
+/*
+=================================================
+ GET MY MOUs
+ IMPORTANT:
+ MUST COME BEFORE /:id
 =================================================
 */
 
@@ -140,6 +178,7 @@ router.get("/my-mous", auth, async (req, res) => {
 /*
 =================================================
  GET SINGLE MOU
+ MUST COME AFTER /all and /my-mous
 =================================================
 */
 
@@ -280,43 +319,6 @@ router.patch("/sign/:id", auth, async (req, res) => {
 
     return res.status(500).json({
       message: "Error during signing phase",
-      error: err.message,
-    });
-  }
-});
-
-/*
-=================================================
- GET ALL MOUs
-=================================================
-*/
-
-router.get("/all", auth, async (req, res) => {
-  try {
-
-    const { data, error } = await supabase
-      .from("mous")
-      .select("*")
-      .order("updated_at", {
-        ascending: false,
-      });
-
-    if (error) {
-      console.error("❌ FETCH ERROR:", error);
-
-      return res.status(500).json({
-        message: "Error fetching registry",
-        error: error.message,
-      });
-    }
-
-    return res.json(data || []);
-
-  } catch (err) {
-    console.error("💥 FETCH CRASH:", err);
-
-    return res.status(500).json({
-      message: "Error fetching registry",
       error: err.message,
     });
   }
