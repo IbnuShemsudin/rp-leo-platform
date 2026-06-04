@@ -13,7 +13,8 @@ import {
   Shield,
   Crown,
   User,
-  Power
+  Power,
+  MessageSquare // 1. Imported for Messages Module
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -22,9 +23,11 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
+  // 2. Added Messages payload into standard routing array
   const menuItems = [
     { label: 'Overview', path: '/dashboard', icon: LayoutDashboard, roles: ['admin','staff'], description: 'Executive Dashboard' },
     { label: 'MoU Registry', path: '/registry', icon: FileText, roles: ['admin','staff'], description: 'Partnership Management' },
+    { label: 'Messages', path: '/messages', icon: MessageSquare, roles: ['admin','staff'], description: 'Secure Communications' },
     { label: 'EA-ROAD Projects', path: '/projects', icon: Radio, roles: ['admin','staff'], description: 'Regional Initiatives' },
     { label: 'Settings', path: '/settings', icon: Settings, roles: ['admin','staff'], description: 'System Configuration' },
   ];
@@ -63,8 +66,9 @@ export default function Sidebar() {
         )}
 
         <button
+          type="button"
           onClick={() => setCollapsed(!collapsed)}
-          className="p-2 rounded-lg hover:bg-white/10 transition-all hover:scale-110 active:scale-95 group relative"
+          className={`p-2 rounded-lg hover:bg-white/10 transition-all hover:scale-110 active:scale-95 group relative ${collapsed ? 'mx-auto' : ''}`}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-rp-blue/20 to-rp-gold/20 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <div className="relative">
@@ -86,17 +90,18 @@ export default function Sidebar() {
                   <div className="absolute inset-0 bg-gradient-to-r from-rp-blue/20 to-rp-gold/20 rounded-xl blur opacity-75"></div>
                 )}
                 <button
+                  type="button"
                   onClick={() => navigate(item.path)}
                   className={`relative w-full flex items-center gap-4 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all group/btn ${
                     isActive
                       ? 'bg-gradient-to-r from-rp-blue to-rp-gold text-white shadow-lg shadow-rp-blue/30'
                       : 'text-gray-400 hover:text-white hover:bg-white/10 hover:shadow-md hover:shadow-white/10'
-                  }`}
-                  title={collapsed ? item.description : undefined}
+                  } ${collapsed ? 'justify-center' : ''}`}
+                  title={collapsed ? item.label : undefined}
                 >
-                  <Icon size={18} className={`${isActive ? 'text-white' : 'text-rp-blue group-hover/btn:text-rp-gold'} transition-colors`} />
+                  <Icon size={18} className={`${isActive ? 'text-white' : 'text-rp-blue group-hover/btn:text-rp-gold'} transition-colors shrink-0`} />
                   {!collapsed && (
-                    <div className="flex flex-col items-start">
+                    <div className="flex flex-col items-start text-left">
                       <span className="leading-tight">{item.label}</span>
                       <span className="text-[8px] text-gray-500 group-hover/btn:text-gray-300 transition-colors font-medium normal-case">
                         {item.description}
@@ -112,16 +117,18 @@ export default function Sidebar() {
           })}
       </nav>
 
-      {/* Admin Only */}
+      {/* Admin Only Actions */}
       {user?.role === 'admin' && (
         <div className="pt-6 mt-6 border-t border-white/10 relative z-10">
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-rp-gold/20 to-rp-blue/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <button
+              type="button"
               onClick={() => navigate('/register')}
-              className="relative w-full flex items-center gap-4 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider border border-rp-gold/30 text-rp-gold hover:bg-gradient-to-r hover:from-rp-gold hover:to-rp-blue hover:text-white hover:border-transparent transition-all hover:shadow-lg hover:shadow-rp-gold/20 group/btn"
+              className={`relative w-full flex items-center gap-4 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider border border-rp-gold/30 text-rp-gold hover:bg-gradient-to-r hover:from-rp-gold hover:to-rp-blue hover:text-white hover:border-transparent transition-all hover:shadow-lg hover:shadow-rp-gold/20 group/btn ${collapsed ? 'justify-center' : ''}`}
+              title={collapsed ? 'Add Staff' : undefined}
             >
-              <Crown size={16} className="group-hover/btn:scale-110 transition-transform" />
+              <Crown size={16} className="group-hover/btn:scale-110 transition-transform shrink-0" />
               {!collapsed && 'Add Staff'}
               {!collapsed && <UserPlus size={12} className="ml-auto group-hover/btn:rotate-12 transition-transform" />}
             </button>
@@ -129,30 +136,32 @@ export default function Sidebar() {
         </div>
       )}
 
-      {/* User Profile */}
-      <div className="pt-6 mt-6 border-t border-white/5">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-xl bg-rp-blue flex items-center justify-center text-xs font-black">
+      {/* User Profile Footer */}
+      <div className="pt-6 mt-6 border-t border-white/5 relative z-10">
+        <div className={`flex items-center gap-3 mb-4 ${collapsed ? 'justify-center' : ''}`}>
+          <div className="w-9 h-9 rounded-xl bg-rp-blue flex items-center justify-center text-xs font-black shrink-0 shadow-inner">
             {user?.name?.charAt(0) || 'U'}
           </div>
 
           {!collapsed && (
-            <div>
-              <p className="text-[10px] font-black uppercase">
-                {user?.name}
+            <div className="overflow-hidden">
+              <p className="text-[10px] font-black uppercase truncate">
+                {user?.name || 'Authorized User'}
               </p>
-              <p className="text-[8px] text-gray-400 uppercase">
-                {user?.role}
+              <p className="text-[8px] text-gray-400 uppercase tracking-wider">
+                {user?.role || 'Staff Node'}
               </p>
             </div>
           )}
         </div>
 
         <button
+          type="button"
           onClick={logout}
-          className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-wider text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+          className={`w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-wider text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all ${collapsed ? 'justify-center' : ''}`}
+          title={collapsed ? 'Logout' : undefined}
         >
-          <LogOut size={16}/>
+          <LogOut size={16} className="shrink-0" />
           {!collapsed && 'Logout'}
         </button>
       </div>

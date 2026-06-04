@@ -22,28 +22,30 @@ import Opportunities from './pages/Opportunities';
 import Projects from './pages/Projects';
 import GlobalFooter from './components/Footer';
 import Settings from './pages/Settings';
-import Messages from "./pages/Messages";
+import Messages from './pages/Messages';
 
 /* =========================
    AUTH GUARDS
 ========================= */
 
-// Logged-in only
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth();
-  if (!token) return <Navigate to="/login" replace />;
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
   return children;
 };
 
-// Role-based access
 const RoleRoute = ({ children, allowedRoles }) => {
   const { token, user } = useAuth();
 
-  if (!token) return <Navigate to="/login" replace />;
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
 
   if (!allowedRoles.includes(user?.role)) {
-    // FIXED: Changed fallback from '/settings' to '/' so unauthorized roles are 
-    // seamlessly sent to the landing hub or home base instead of their account configuration.
     return <Navigate to="/" replace />;
   }
 
@@ -59,9 +61,9 @@ const FooterWrapper = () => {
 
   const hiddenRoutes = [
     '/dashboard',
-    '/initiate',
     '/registry',
     '/projects',
+    '/initiate',
     '/settings',
     '/register',
     '/messages'
@@ -86,20 +88,22 @@ export default function App() {
       <Router>
         <div className="min-h-screen bg-space-portal text-slate-100 selection:bg-rp-gold selection:text-white transition-colors duration-500 relative flex flex-col">
 
-          {/* Background FX */}
           <div className="scanline opacity-10 pointer-events-none fixed inset-0 z-0"></div>
 
           <div className="flex-grow relative z-10">
+
             <Routes>
 
-              {/* ================= PUBLIC ================= */}
+              {/* PUBLIC ROUTES */}
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/volunteer" element={<Volunteer />} />
               <Route path="/opportunities" element={<Opportunities />} />
               <Route path="/ea-road" element={<EARoad />} />
+              <Route path="/register" element={<Register />} />
 
-              {/* ================= PROTECTED (ALL LOGGED USERS) ================= */}
+              
+              {/* SETTINGS - ALL AUTHENTICATED USERS */}
               <Route
                 path="/settings"
                 element={
@@ -109,6 +113,7 @@ export default function App() {
                 }
               />
 
+              {/* MESSAGES - ALL AUTHENTICATED USERS */}
               <Route
                 path="/messages/:mouId"
                 element={
@@ -118,7 +123,7 @@ export default function App() {
                 }
               />
 
-              {/* ================= ADMIN + EXECUTIVE ================= */}
+              {/* DASHBOARD - ADMIN + EXECUTIVE */}
               <Route
                 path="/dashboard"
                 element={
@@ -128,6 +133,7 @@ export default function App() {
                 }
               />
 
+              {/* REGISTRY - ADMIN + EXECUTIVE */}
               <Route
                 path="/registry"
                 element={
@@ -137,6 +143,7 @@ export default function App() {
                 }
               />
 
+              {/* PROJECTS - ADMIN + EXECUTIVE */}
               <Route
                 path="/projects"
                 element={
@@ -146,17 +153,23 @@ export default function App() {
                 }
               />
 
-              {/* Staff INCLUDED here */}
+              {/* INITIATE MOU - ADMIN + EXECUTIVE + STAFF */}
               <Route
                 path="/initiate"
                 element={
-                  <RoleRoute allowedRoles={['admin', 'executive', 'staff']}>
+                  <RoleRoute
+                    allowedRoles={[
+                      'admin',
+                      'executive',
+                      'staff'
+                    ]}
+                  >
                     <InitiateMoU />
                   </RoleRoute>
                 }
               />
 
-              {/* ================= ADMIN ONLY ================= */}
+              {/* REGISTER - ADMIN ONLY */}
               <Route
                 path="/register"
                 element={
@@ -166,8 +179,11 @@ export default function App() {
                 }
               />
 
-              {/* ================= FALLBACK ================= */}
-              <Route path="*" element={<Navigate to="/" />} />
+              {/* FALLBACK */}
+              <Route
+                path="*"
+                element={<Navigate to="/" replace />}
+              />
 
             </Routes>
           </div>

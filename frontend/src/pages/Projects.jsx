@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { 
   MapPin, Activity, Radio, Satellite, Eye, 
   TrendingUp, AlertTriangle, CheckCircle, 
-  Globe, Zap, Terminal, Maximize2 
+  Globe, Zap, Terminal, Maximize2, Loader2 
 } from 'lucide-react';
 
 const PROJECTS = [
@@ -14,15 +14,28 @@ const PROJECTS = [
 ];
 
 export default function Projects() {
+  const [mapStatus, setMapStatus] = useState('idle'); // 'idle' | 'initializing' | 'active'
+
+  const handleInitMap = () => {
+    setMapStatus('initializing');
+    setTimeout(() => {
+      setMapStatus('active');
+    }, 2000);
+  };
+
   return (
-    <div className="flex min-h-screen bg-[#05070a] text-slate-100 font-sans selection:bg-rp-blue/30 selection:text-rp-blue">
+    /* FIXED: Changed layout to an absolute viewport height max (h-screen) and disabled general outer overflow structure */
+    <div className="flex h-screen w-screen bg-[#05070a] text-slate-100 font-sans selection:bg-rp-blue/30 selection:text-rp-blue overflow-hidden">
+      
       {/* HUD Scanline Effect */}
       <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
 
+      {/* Note: Ensure inside your Sidebar.jsx component that aside contains 'h-screen sticky top-0' layout parameters */}
       <Sidebar />
       
-      <main className="flex-1 p-6 lg:p-10 z-10 overflow-y-auto">
-        <div className="max-w-[1600px] mx-auto space-y-10">
+      {/* FIXED: Added 'h-full overflow-y-auto' explicitly to the main content layout element container so only it scrolls */}
+      <main className="flex-1 h-full p-6 lg:p-10 z-10 overflow-y-auto custom-scrollbar">
+        <div className="max-w-[1600px] mx-auto space-y-10 pb-12">
           
           {/* Top Command Bar */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-white/5 pb-8">
@@ -60,25 +73,38 @@ export default function Projects() {
 
           {/* Central Visualization Hub */}
           <div className="relative group rounded-[40px] border border-white/5 bg-[#0a0c10] overflow-hidden min-h-[500px]">
-             <div className="absolute top-8 left-8 z-20 space-y-2">
+              <div className="absolute top-8 left-8 z-20 space-y-2">
                 <h3 className="text-xl font-black text-white uppercase italic">Geospatial Mapping Hub</h3>
                 <div className="flex gap-2">
-                  <Badge text="Live Feed" color="bg-emerald-500" />
-                  <Badge text="Encrypted" color="bg-rp-blue" />
+                  <Badge text="Live Feed" type="emerald" />
+                  <Badge text="Encrypted" type="blue" />
                 </div>
-             </div>
-             
-             {/* Map Placeholder Content */}
-             <div className="absolute inset-0 flex items-center justify-center">
+              </div>
+              
+              {/* Map Placeholder Content */}
+              <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative w-full h-full flex items-center justify-center opacity-40">
-                  <div className="absolute w-[400px] h-[400px] border border-rp-blue/20 rounded-full animate-[spin_60s_linear_infinite]" />
-                  <div className="absolute w-[600px] h-[600px] border border-rp-gold/10 rounded-full animate-[spin_45s_linear_infinite_reverse]" />
-                  <Globe size={120} className="text-rp-blue/20" />
+                  <div className={`absolute w-[400px] h-[400px] border border-rp-blue/20 rounded-full ${mapStatus === 'active' ? 'animate-[spin_20s_linear_infinite]' : 'animate-[spin_60s_linear_infinite]'}`} />
+                  <div className={`absolute w-[600px] h-[600px] border border-rp-gold/10 rounded-full ${mapStatus === 'active' ? 'animate-[spin_15s_linear_infinite_reverse]' : 'animate-[spin_45s_linear_infinite_reverse]'}`} />
+                  <Globe size={120} className={`${mapStatus === 'active' ? 'text-rp-gold/40' : 'text-rp-blue/20'} transition-colors duration-1000`} />
                 </div>
-                <button className="z-20 bg-white/5 hover:bg-rp-blue hover:text-white border border-white/10 px-8 py-3 rounded-full font-black uppercase text-[10px] tracking-widest transition-all backdrop-blur-md">
-                   Initialize Full-Scale Map
+                
+                <button 
+                  type="button"
+                  onClick={handleInitMap}
+                  disabled={mapStatus !== 'idle'}
+                  className="z-20 bg-white/5 hover:bg-rp-blue hover:text-white border border-white/10 px-8 py-3 rounded-full font-black uppercase text-[10px] tracking-widest transition-all backdrop-blur-md disabled:opacity-80 flex items-center gap-2"
+                >
+                  {mapStatus === 'idle' && 'Initialize Full-Scale Map'}
+                  {mapStatus === 'initializing' && (
+                    <>
+                      <Loader2 size={12} className="animate-spin" />
+                      Syncing Uplink Vectors...
+                    </>
+                  )}
+                  {mapStatus === 'active' && 'Telemetry Visualizer Online'}
                 </button>
-             </div>
+              </div>
           </div>
 
         </div>
@@ -91,7 +117,6 @@ export default function Projects() {
 
 const ProjectCard = ({ project }) => (
   <div className="relative group cursor-pointer">
-    {/* Background Glow */}
     <div className="absolute -inset-[1px] bg-gradient-to-br from-rp-blue/20 to-transparent opacity-0 group-hover:opacity-100 rounded-[32px] transition-opacity duration-500" />
     
     <div className="relative h-full glass-panel p-6 rounded-[32px] border border-white/10 bg-[#0d1117] transition-all duration-500 group-hover:-translate-y-2">
@@ -158,8 +183,16 @@ const DataPoint = ({ label, value }) => (
   </div>
 );
 
-const Badge = ({ text, color }) => (
-  <div className={`${color} bg-opacity-10 border border-${color} border-opacity-20 px-3 py-1 rounded-full`}>
-    <span className={`text-[8px] font-black uppercase text-${color} tracking-tighter`}>{text}</span>
-  </div>
-);
+const Badge = ({ text, type }) => {
+  const themes = {
+    emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+    blue: 'bg-rp-blue/10 border-rp-blue/20 text-rp-blue',
+    gold: 'bg-rp-gold/10 border-rp-gold/20 text-rp-gold'
+  };
+
+  return (
+    <div className={`border px-3 py-1 rounded-full ${themes[type] || themes.blue}`}>
+      <span className="text-[8px] font-black uppercase tracking-tighter">{text}</span>
+    </div>
+  );
+};
