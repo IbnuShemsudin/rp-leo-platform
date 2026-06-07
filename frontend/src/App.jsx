@@ -22,6 +22,7 @@ import Opportunities from './pages/Opportunities';
 import Projects from './pages/Projects';
 import GlobalFooter from './components/Footer';
 import Settings from './pages/Settings';
+import Inbox from './pages/Inbox';
 import Messages from './pages/Messages';
 
 /* =========================
@@ -102,7 +103,7 @@ export default function App() {
               <Route path="/ea-road" element={<EARoad />} />
               <Route path="/register" element={<Register />} />
 
-              
+
               {/* SETTINGS - ALL AUTHENTICATED USERS */}
               <Route
                 path="/settings"
@@ -114,6 +115,15 @@ export default function App() {
               />
 
               {/* MESSAGES - ALL AUTHENTICATED USERS */}
+              <Route
+                path="/messages"
+                element={
+                  <ProtectedRoute>
+                    <Inbox />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route
                 path="/messages/:mouId"
                 element={

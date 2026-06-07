@@ -43,7 +43,8 @@ if (!fs.existsSync(uploadsPath)) {
 
 // Allowed origins: Your Vercel frontend URL and local development port
 const allowedOrigins = [
-  "https://rp-leo-platform.vercel.app", // 👈 CHANGE THIS to your actual live Vercel URL
+  "https://rp-leo-platform.vercel.app",   // Your main live Vercel URL
+  "https://rp-leo-platform.vercel.app/",  // Catch trailing slash variations
   "http://localhost:5173"                  // Keeps local Vite testing working
 ];
 
@@ -52,13 +53,20 @@ app.use(
     origin: function (origin, callback) {
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
+      
+      // Fix: Check explicit array match OR dynamic Vercel previews/branches
+      const isAllowed = allowedOrigins.indexOf(origin) !== -1 || origin.endsWith(".vercel.app");
+
+      if (!isAllowed) {
+        console.warn(`🛑 Blocked by CORS: Origin [${origin}] is not authorized.`);
         const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
         return callback(new Error(msg), false);
       }
       return callback(null, true);
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"]
   })
 );
 
@@ -221,3 +229,7 @@ app.listen(PORT, () => {
   console.log(`🌐 Upload URL: http://localhost:${PORT}/uploads`);
   console.log("-----------------------------------------");
 });
+
+
+
+

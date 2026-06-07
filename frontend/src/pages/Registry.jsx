@@ -4,6 +4,8 @@ import Sidebar from '../components/Sidebar';
 import FactSheet from '../components/FactSheet';
 import NewMoUModal from '../components/NewMoUModal';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 import {
   Search,
   Edit3,
@@ -66,19 +68,28 @@ export default function Registry() {
     }
   }, [token]);
 
+  const getMoUId = (mou) => mou?.id || mou?._id || mou?.uuid;
+
   const handleUpdateStatus = async (e) => {
     e.preventDefault();
+    if (!selectedMou) return;
+    const mouId = getMoUId(selectedMou);
+    if (!mouId) {
+      alert('Unable to update this record: missing identifier.');
+      setIsUpdating(false);
+      return;
+    }
     setIsUpdating(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/mou/update/${selectedMou._id}`, {
+      const response = await fetch(`${API}/api/mou/update/${mouId}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
           'x-auth-token': token 
         },
         body: JSON.stringify({
-          status: selectedMou.status,
-          currentStep: selectedMou.currentStep
+          status: selectedMou.status ?? 'Draft',
+          currentStep: selectedMou.currentStep ?? 1
         }),
       });
 
@@ -86,19 +97,28 @@ export default function Registry() {
         setSelectedMou(null);
         fetchRegistry(); 
       } else {
-        alert("Update failed.");
+        const errorBody = await response.json().catch(() => ({}));
+        console.error('Update failed:', response.status, errorBody);
+        alert(errorBody.msg || errorBody.message || 'Update failed.');
       }
     } catch (err) {
-      console.error("Update error:", err);
+      console.error('Update error:', err);
+      alert('Error updating registry entry.');
     } finally {
       setIsUpdating(false);
     }
   };
 
   const handleQuickApprove = async (mou) => {
+    if (!mou) return;
+    const mouId = getMoUId(mou);
+    if (!mouId) {
+      console.error('Unable to approve record: missing id', mou);
+      return;
+    }
     setIsUpdating(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/mou/update/${mou._id}`, {
+      const response = await fetch(`${API}/api/mou/update/${mouId}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -122,9 +142,10 @@ export default function Registry() {
   };
 
   const handleDelete = async (id) => {
+    if (!id) return;
     if (!window.confirm("CRITICAL: Purge this record from the Sector Data Node?")) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/mou/${id}`, {
+      const response = await fetch(`${API}/api/mou/${id}`, {
         method: 'DELETE',
         headers: { 'x-auth-token': token }
       });
@@ -138,8 +159,8 @@ export default function Registry() {
   };
 
   const filteredMous = mous.filter(mou => 
-    mou.partnerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    mou.country.toLowerCase().includes(searchTerm.toLowerCase())
+    (mou.partnerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (mou.country || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -260,7 +281,7 @@ export default function Registry() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {filteredMous.map((mou, index) => (
-                    <tr key={mou._id} className="hover:bg-gradient-to-r hover:from-rp-blue/5 hover:to-transparent transition-all duration-300 group animate-in slide-in-from-bottom-2" style={{ animationDelay: `${index * 50}ms` }}>
+                    <tr key={mou.id || mou._id || index} className="hover:bg-gradient-to-r hover:from-rp-blue/5 hover:to-transparent transition-all duration-300 group animate-in slide-in-from-bottom-2" style={{ animationDelay: `${index * 50}ms` }}>
                       <td className="px-12 py-8">
                         <div className="flex items-center gap-5">
                           <div className="relative">
@@ -345,7 +366,7 @@ export default function Registry() {
                   </button>
                 )}
                 <button
-                  onClick={() => handleDelete(viewingMou._id)}
+                  onClick={() => handleDelete(getMoUId(viewingMou))}
                   className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-rose-500/25 transform hover:scale-105 active:scale-95"
                   title="Delete Record"
                 >
@@ -393,7 +414,7 @@ export default function Registry() {
                 <label className="text-sm font-black uppercase text-gray-400 tracking-widest">Operational Status</label>
                 <select
                   className="w-full px-6 py-5 bg-gradient-to-r from-black/40 to-black/20 border border-white/10 rounded-2xl outline-none font-bold text-white focus:border-rp-blue focus:ring-2 focus:ring-rp-blue/20 transition-all duration-300 appearance-none cursor-pointer text-sm shadow-lg hover:border-white/20"
-                  value={selectedMou.status}
+                  value={selectedMou.status ?? 'Draft'}
                   onChange={(e) => setSelectedMou({...selectedMou, status: e.target.value})}
                 >
                   <option value="Draft" className="bg-[#0a0c10] text-white">Drafting Phase</option>
@@ -416,8 +437,8 @@ export default function Registry() {
                     min="1"
                     max="10"
                     className="w-full h-2 bg-gradient-to-r from-white/10 to-white/5 rounded-lg appearance-none cursor-pointer accent-rp-blue shadow-lg"
-                    value={selectedMou.currentStep}
-                    onChange={(e) => setSelectedMou({...selectedMou, currentStep: parseInt(e.target.value)})}
+                    value={selectedMou.currentStep ?? 1}
+                    onChange={(e) => setSelectedMou({...selectedMou, currentStep: parseInt(e.target.value, 10)})}
                   />
                   <div className="flex justify-between mt-2 px-1">
                     {Array.from({ length: 10 }, (_, i) => (

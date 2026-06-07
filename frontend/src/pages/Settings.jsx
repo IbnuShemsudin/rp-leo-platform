@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -32,6 +32,19 @@ export default function Settings() {
 
   const [apiKey, setApiKey] = useState('RP-LEO-APL-2026');
   const [showDeletePrompt, setShowDeletePrompt] = useState(false);
+
+  /* ==========================================
+     HYDRATION WATCHER: PREVENTS EMPTY REFRESH FORMS
+     ========================================== */
+  useEffect(() => {
+    if (user) {
+      setForm((prev) => ({
+        ...prev,
+        name: user.name || '',
+        email: user.email || '',
+      }));
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -99,7 +112,9 @@ export default function Settings() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/update', {
+      // Dynamic endpoint interpolation addresses cloud endpoints on Vercel
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${baseUrl}/api/auth/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

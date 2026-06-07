@@ -131,7 +131,74 @@ export const registerUser = async (req, res) => {
     });
   }
 };
+export const updateUser = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const userId = req.user?.id;
 
+    if (!userId) {
+      return res.status(401).json({ msg: "Authorization required" });
+    }
+
+    if (!name && !email && !password) {
+      return res.status(400).json({ msg: "Please provide at least one field to update" });
+    }
+
+    if (email) {
+      const { data: existingUser, error: existingError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("email", email)
+        .neq("id", userId)
+        .single();
+
+      if (existingError && existingError.code !== "PGRST116") {
+        console.error("Email check error:", existingError);
+        return res.status(500).json({ msg: "Failed to validate email" });
+      }
+
+      if (existingUser) {
+        return res.status(400).json({ msg: "Email already in use" });
+      }
+    }
+
+    const updatePayload = {
+      updated_at: new Date().toISOString(),
+    };
+
+    if (name) updatePayload.name = name;
+    if (email) updatePayload.email = email;
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      updatePayload.password = await bcrypt.hash(password, salt);
+    }
+
+    const { data: updatedUser, error: updateError } = await supabase
+      .from("users")
+      .update(updatePayload)
+      .eq("id", userId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error("Update user error:", updateError);
+      return res.status(500).json({ msg: updateError.message || "Unable to update user" });
+    }
+
+    return res.json({
+      success: true,
+      user: {
+        _id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+      },
+    });
+  } catch (error) {
+    console.error("Update user exception:", error);
+    res.status(500).json({ msg: "Server error while updating user" });
+  }
+};
 /*
 LOGIN USER
 POST /api/auth/login

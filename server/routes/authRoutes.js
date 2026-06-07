@@ -1,7 +1,9 @@
 import express from "express";
+import auth from "../middleware/auth.js";
 import {
   registerUser,
   loginUser,
+  updateUser,
 } from "../controllers/authController.js";
 
 const router = express.Router();
@@ -13,5 +15,6 @@ const router = express.Router();
 */
 router.post("/register", registerUser);
 router.post("/login", loginUser);
+router.put("/update", auth, updateUser);
 
 export default router;

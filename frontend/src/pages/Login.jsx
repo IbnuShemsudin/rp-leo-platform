@@ -12,6 +12,12 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!email.trim() || !password.trim()) {
+      alert('Please enter both email and password.');
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
@@ -73,6 +79,7 @@ export default function Login() {
               </label>
               <input 
                 type="email" 
+                value={email}
                 required
                 disabled={isSubmitting}
                 className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl outline-none focus:border-rp-blue transition-all font-bold text-sm text-white placeholder:text-white/10 disabled:opacity-50"
@@ -87,6 +94,7 @@ export default function Login() {
               </label>
               <input 
                 type="password" 
+                value={password}
                 required
                 disabled={isSubmitting}
                 className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl outline-none focus:border-rp-blue transition-all font-bold text-sm text-white placeholder:text-white/10 disabled:opacity-50"
