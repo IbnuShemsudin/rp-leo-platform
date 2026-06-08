@@ -26,7 +26,7 @@ import {
   Send
 } from 'lucide-react';
 
-const API = import.meta.env.VITE_API_URL || "http://import.meta.env.VITE_API_URL";
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -219,9 +219,9 @@ export default function Dashboard() {
         onClick={() => setIsSidebarOpen(false)}
       />
 
-      {/* Sidebar */}
+      {/* Sidebar - FIXED STICKY AND WIDTH RULES FOR RESPONSIVENESS */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 transform lg:relative lg:translate-x-0 transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#05070a] border-r border-white/5 transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 transition-transform duration-300 ease-in-out ${
           isSidebarOpen
             ? 'translate-x-0'
             : '-translate-x-full'
@@ -230,7 +230,7 @@ export default function Dashboard() {
         <Sidebar />
       </div>
 
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 pt-20 lg:pt-12 overflow-y-auto relative custom-scrollbar h-screen">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 pt-20 lg:pt-12 min-w-0 overflow-y-auto relative custom-scrollbar h-screen">
 
         {/* MOBILE HEADER */}
         <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#05070a]/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-6 z-30">
@@ -358,53 +358,45 @@ export default function Dashboard() {
               </div>
 
               {/* REGISTRY */}
-              <div className="glass-panel rounded-[32px] md:rounded-[48px] border border-white/10 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent overflow-hidden shadow-2xl backdrop-blur-xl">
+              {/* REGISTRY CARD CONTAINER */}
+              <div className="glass-panel rounded-2xl sm:rounded-[32px] border border-white/10 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent overflow-hidden shadow-2xl backdrop-blur-xl">
 
-                <div className="p-6 md:p-8 border-b border-white/5">
-                  <div className="flex items-center gap-3">
-                    <Globe size={20} className="text-rp-blue" />
-
-                    <h3 className="text-base md:text-lg font-black text-white uppercase tracking-tight">
-                      Partnership Registry
-                    </h3>
-                  </div>
+                {/* CARD HEADER */}
+                <div className="p-4 sm:p-6 border-b border-white/5 flex items-center gap-3">
+                  <Globe size={18} className="text-rp-blue" />
+                  <h3 className="text-sm sm:text-base font-black text-white uppercase tracking-tight">
+                    Partnership Registry
+                  </h3>
                 </div>
 
-                <div className="overflow-x-auto custom-scrollbar">
-
-                  <table className="w-full min-w-[700px]">
-
+                {/* RESPONSIVE ISOLATION LAYER */}
+                <div className="w-full overflow-x-auto custom-scrollbar [scrolling-touch:auto]">
+                  <table className="w-full min-w-[650px] table-auto">
+                    
                     <thead>
-                      <tr className="bg-gradient-to-r from-white/[0.03] to-white/[0.01] border-b border-white/5">
-
-                        <th className="px-6 md:px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-widest text-left">
+                      <tr className="bg-white/[0.02] border-b border-white/5">
+                        <th className="px-4 sm:px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest text-left">
                           Institution
                         </th>
-
-                        <th className="px-6 md:px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">
+                        <th className="px-4 sm:px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">
                           Status
                         </th>
-
-                        <th className="px-6 md:px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">
+                        <th className="px-4 sm:px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">
                           Lifecycle
                         </th>
-
-                        <th className="px-6 md:px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-widest text-right">
+                        <th className="px-4 sm:px-6 py-4 text-[10px] font-black uppercase text-gray-400 tracking-widest text-right">
                           Action
                         </th>
-
                       </tr>
                     </thead>
 
-                    <tbody>
-
+                    <tbody className="divide-y divide-white/5">
                       {loading ? (
                         <tr>
-                          <td colSpan="4" className="px-8 py-20 text-center">
-                            <div className="flex flex-col items-center gap-4">
-                              <Loader2 className="w-10 h-10 text-rp-blue animate-spin" />
-
-                              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                          <td colSpan="4" className="px-6 py-16 text-center">
+                            <div className="flex flex-col items-center gap-3">
+                              <Loader2 className="w-8 h-8 text-rp-blue animate-spin" />
+                              <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">
                                 Syncing...
                               </span>
                             </div>
@@ -412,91 +404,73 @@ export default function Dashboard() {
                         </tr>
                       ) : filteredMous.length === 0 ? (
                         <tr>
-                          <td colSpan="4" className="px-8 py-20 text-center">
-                            <div className="flex flex-col items-center gap-4 opacity-50">
-                              <Database size={32} />
-
-                              <p className="text-sm font-bold uppercase tracking-widest">
-                                No Records Found
-                              </p>
+                          <td colSpan="4" className="px-6 py-16 text-center">
+                            <div className="flex flex-col items-center gap-3 opacity-40">
+                              <Database size={28} />
+                              <p className="text-xs font-bold uppercase tracking-widest">No Records Found</p>
                             </div>
                           </td>
                         </tr>
                       ) : (
                         filteredMous.map((mou, index) => (
-
-                          <tr
-                            key={getMoUId(mou) || index}
-                            className="border-t border-white/5 hover:bg-white/[0.02] transition-colors group"
-                          >
-
-                            <td className="px-6 md:px-8 py-6">
-                              <div className="flex items-center gap-4">
-
-                                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-rp-blue transition-colors">
-                                  <Globe size={18} />
+                          <tr key={getMoUId(mou) || index} className="hover:bg-white/[0.01] transition-colors group">
+                            
+                            {/* INSTITUTION DATA CELL */}
+                            <td className="px-4 sm:px-6 py-4">
+                              <div className="flex items-center gap-3 max-w-[240px] sm:max-w-none">
+                                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-rp-blue transition-colors shrink-0">
+                                  <Globe size={16} />
                                 </div>
-
-                                <div>
-                                  <p className="text-white font-black text-sm md:text-base leading-tight">
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-white font-black text-xs sm:text-sm truncate leading-tight">
                                     {mou.partnerName}
                                   </p>
-
-                                  <p className="text-[10px] text-gray-500 font-medium uppercase tracking-widest">
+                                  <p className="text-[9px] text-gray-500 font-medium uppercase tracking-widest truncate mt-0.5">
                                     {mou.country}
                                   </p>
                                 </div>
-
                               </div>
                             </td>
 
-                            <td className="px-6 md:px-8 py-6 text-center">
+                            {/* STATUS BADGE CELL */}
+                            <td className="px-4 sm:px-6 py-4 text-center whitespace-nowrap">
                               <StatusBadge status={mou.status || "Draft"} />
                             </td>
 
-                            <td className="px-6 md:px-8 py-6">
-
-                              <div className="flex flex-col items-center space-y-2">
-
-                                <div className="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden">
-
+                            {/* PROGRESS TIMELINE CELL */}
+                            <td className="px-4 sm:px-6 py-4">
+                              <div className="flex flex-col items-center space-y-1.5 min-w-[85px]">
+                                <div className="w-16 sm:w-20 h-1 bg-white/10 rounded-full overflow-hidden">
                                   <div
                                     className="h-full bg-gradient-to-r from-rp-gold to-yellow-400"
-                                    style={{
-                                      width: `${((mou.currentStep || 1) / 10) * 100}%`
-                                    }}
+                                    style={{ width: `${((mou.currentStep || 1) / 10) * 100}%` }}
                                   />
-
                                 </div>
-
-                                <span className="text-[10px] text-gray-400 font-bold uppercase">
+                                <span className="text-[9px] text-gray-400 font-bold uppercase">
                                   Ph {mou.currentStep || 1}/10
                                 </span>
-
                               </div>
                             </td>
 
-                            <td className="px-6 md:px-8 py-6 text-right">
-
-                              <div className="flex items-center justify-end gap-3">
-
-                                {/* VIEW FILE */}
+                            {/* ACTION BUTTONS CELL */}
+                            <td className="px-4 sm:px-6 py-4 text-right whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-2">
                                 <button
                                   onClick={() => handleViewFile(mou)}
-                                  className="p-3 bg-white/5 border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all"
+                                  className="p-2 bg-white/5 border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all active:scale-95"
+                                  title="View File"
                                 >
-                                  <Eye size={16} />
+                                  <Eye size={14} />
                                 </button>
-
-                                {/* MESSAGE BUTTON */}
+                                
                                 <button
                                   onClick={() => navigate(`/messages/${getMoUId(mou)}`)}
-                                  className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-400 hover:bg-blue-500/20 transition-all"
+                                  className="p-2 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-400 hover:bg-blue-500/20 transition-all active:scale-95"
+                                  title="Messages"
                                 >
-                                  <MessageSquare size={16} />
+                                  <MessageSquare size={14} />
                                 </button>
 
-                                {/* APPROVE */}
                                 {mou.currentStep === 6 && isExecutive ? (
                                   <SigningManager
                                     mouId={getMoUId(mou)}
@@ -509,15 +483,12 @@ export default function Dashboard() {
                                     <button
                                       onClick={() => openMessageModal(mou)}
                                       disabled={approvingId === getMoUId(mou)}
-                                      className="whitespace-nowrap px-4 py-3 bg-rp-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-2"
+                                      className="px-3 py-2 bg-rp-blue text-white rounded-xl text-[9px] font-black uppercase tracking-wider hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-1.5"
                                     >
-                                      <CheckCircle size={14} />
-
-                                      Approve
+                                      <CheckCircle size={12} /> Approve
                                     </button>
                                   )
                                 )}
-
                               </div>
                             </td>
 
@@ -605,7 +576,7 @@ export default function Dashboard() {
 
       {/* MESSAGE MODAL */}
       {messageModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
 
           <div className="w-full max-w-2xl rounded-[32px] border border-white/10 bg-[#0b0f15] shadow-2xl overflow-hidden">
 
