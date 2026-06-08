@@ -39,8 +39,9 @@ export default function Register() {
     setSuccess('');
 
     try {
+      // ✅ FIXED: Replaced single quotes with template backticks and isolated the environment lookup variable correctly
       const response = await fetch(
-        'http://import.meta.env.VITE_API_URL/api/auth/register',
+        `${import.meta.env.VITE_API_URL}/api/auth/register`,
         {
           method: 'POST',
           headers: {
