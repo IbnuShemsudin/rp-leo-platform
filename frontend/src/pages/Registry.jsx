@@ -4,7 +4,7 @@ import Sidebar from '../components/Sidebar';
 import FactSheet from '../components/FactSheet';
 import NewMoUModal from '../components/NewMoUModal';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API = import.meta.env.VITE_API_URL || 'http://import.meta.env.VITE_API_URL';
 
 import {
   Search,
@@ -43,7 +43,7 @@ export default function Registry() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/mou/all', {
+      const response = await fetch('http://import.meta.env.VITE_API_URL/api/mou/all', {
         headers: { 'x-auth-token': token }
       });
 

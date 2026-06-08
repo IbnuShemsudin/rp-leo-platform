@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { MessageSquare, Loader2, Shield, User } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = import.meta.env.VITE_API_URL || "http://import.meta.env.VITE_API_URL";
 
 export default function Inbox() {
   const { token, user } = useAuth();

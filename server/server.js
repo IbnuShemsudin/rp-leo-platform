@@ -9,6 +9,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 
 // Routes
+
 import mouRoutes from "./routes/mouRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
@@ -16,7 +17,10 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import messageRoutes from "./routes/messages.js";
 import inboxRoutes from "./routes/inbox.js";
 
+
 // Fix __dirname in ES Modules
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -43,7 +47,7 @@ if (!fs.existsSync(uploadsPath)) {
 
 // Allowed origins: Your Vercel frontend URL and local development port
 const allowedOrigins = [
-  "https://rp-leo-platform.vercel.app",   // Your main live Vercel URL
+  "https://rp-leo-platform.vercel.app",  // Your main live Vercel URL
   "https://rp-leo-platform.vercel.app/",  // Catch trailing slash variations
   "http://localhost:5173"                  // Keeps local Vite testing working
 ];
@@ -209,11 +213,15 @@ app.use((err, req, res, next) => {
   });
 });
 
+
+
 /*
 ========================
  START SERVER
 ========================
 */
+
+
 
 const PORT = process.env.PORT || 5000;
 
