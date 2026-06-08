@@ -12,7 +12,7 @@ export default function SigningManager({ mouId, partnerName, onComplete }) {
     // Artificial delay to simulate "Digital Encryption/Verification"
     setTimeout(async () => {
       try {
-        const response = await fetch(`http://import.meta.env.VITE_API_URL/api/mou/sign/${mouId}`, {
+        const response = await fetch(`import.meta.env.VITE_API_URLL/api/mou/sign/${mouId}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',

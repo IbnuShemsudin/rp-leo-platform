@@ -26,7 +26,7 @@ import {
   Send
 } from 'lucide-react';
 
-const API = import.meta.env.VITE_API_URL || "http://import.meta.env.VITE_API_URL";
+const API = import.meta.env.VITE_API_URL || "import.meta.env.VITE_API_URLL";
 
 export default function Dashboard() {
   const navigate = useNavigate();

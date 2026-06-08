@@ -40,7 +40,7 @@ export default function Register() {
 
     try {
       const response = await fetch(
-        'http://import.meta.env.VITE_API_URL/api/auth/register',
+        'import.meta.env.VITE_API_URLL/api/auth/register',
         {
           method: 'POST',
           headers: {
