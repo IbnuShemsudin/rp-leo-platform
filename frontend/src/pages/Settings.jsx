@@ -113,7 +113,7 @@ export default function Settings() {
 
     try {
       // Dynamic endpoint interpolation addresses cloud endpoints on Vercel
-      const baseUrl = import.meta.env.VITE_API_URL || 'import.meta.env.VITE_API_URLL';
+      const baseUrl = import.meta.env.VITE_API_URL || 'import.meta.env.VITE_API_URL';
       const response = await fetch(`${baseUrl}/api/auth/update`, {
         method: 'PUT',
         headers: {
