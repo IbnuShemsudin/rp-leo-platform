@@ -43,7 +43,7 @@ export default function Registry() {
     setError('');
 
     try {
-      const response = await fetch('http://import.meta.env.VITE_API_URL/api/mou/all', {
+      const response = await fetch(`https://rp-leo-platform.onrender.com/api/mou/all`, {
         headers: { 'x-auth-token': token }
       });
 
