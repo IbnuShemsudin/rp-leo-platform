@@ -97,7 +97,7 @@ export default function NewMoUModal({ isOpen, onClose, onRefresh }) {
     fileData.append('file', file);
 
     try {
-      const res = await fetch('import.meta.env.VITE_API_URL/api/upload', {
+      const res = await fetch('http://import.meta.env.VITE_API_URL/api/upload', {
         method: 'POST',
         headers: {
           'x-auth-token': token
@@ -141,7 +141,7 @@ export default function NewMoUModal({ isOpen, onClose, onRefresh }) {
     setSubmitError('');
 
     try {
-      const res = await fetch('import.meta.env.VITE_API_URL/api/mou/register', {
+      const res = await fetch('http://import.meta.env.VITE_API_URL/api/mou/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
