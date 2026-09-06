@@ -1,76 +1,75 @@
 import express from "express";
 import { supabase } from "../config/supabase.js";
+import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
-/*
-GET notifications
-*/
-
-router.get("/", async (req, res) => {
+// GET /api/notifications
+// Returns notifications belonging to the authenticated user
+router.get("/", auth, async (req, res) => {
   try {
+    const userId = req.user.id;
+
     const { data, error } = await supabase
       .from("notifications")
       .select("*")
-      .order("created_at", {
-        ascending: false,
-      })
-      .limit(20);
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
 
     if (error) {
+      console.error("❌ Notifications fetch error:", error);
+
       return res.status(500).json({
-        message: "Failed to fetch notifications",
+        success: false,
+        message: error.message,
       });
     }
 
-    res.json(data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Failed to fetch notifications",
+    return res.json(data || []);
+  } catch (err) {
+    console.error("💥 Notifications crash:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
     });
   }
 });
 
-/*
-CREATE notification
-*/
-
-router.post("/", async (req, res) => {
+// PATCH /api/notifications/:id/read
+// Marks a notification as read
+router.patch("/:id/read", auth, async (req, res) => {
   try {
-    const {
-      title,
-      message,
-      type,
-      role,
-      link,
-    } = req.body;
+    const { id } = req.params;
+    const userId = req.user.id;
 
     const { data, error } = await supabase
       .from("notifications")
-      .insert([
-        {
-          title,
-          message,
-          type,
-          role,
-          link,
-        },
-      ])
+      .update({ read: true })
+      .eq("id", id)
+      .eq("user_id", userId)
       .select()
       .single();
 
     if (error) {
+      console.error("❌ Mark notification read error:", error);
+
       return res.status(500).json({
-        message: "Failed to create notification",
+        success: false,
+        message: error.message,
       });
     }
 
-    res.status(201).json(data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Failed to create notification",
+    return res.json({
+      success: true,
+      data,
+    });
+  } catch (err) {
+    console.error("💥 Mark notification read crash:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
     });
   }
 });
