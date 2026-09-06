@@ -21,7 +21,8 @@ export default function Login() {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch(`https://rp-leo-platform.onrender.com/api/auth/login`, {
+      const api = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${api}/api/auth/login`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -36,6 +37,10 @@ export default function Login() {
         login(data.user, data.token);
         navigate('/dashboard');
       } else {
+        if (data.verificationRequired) {
+          navigate('/verify-email', { state: { email: data.email || email } });
+          return;
+        }
         alert(data.msg || 'Authorization failed. Please check your credentials.');
       }
     } catch (err) {

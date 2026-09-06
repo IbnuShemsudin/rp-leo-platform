@@ -8,6 +8,16 @@ const escapeHtml = (str) => {
     .replace(/'/g, "&#039;");
 };
 
+export const getEmailVerificationTemplate = (name, code, expiresInMinutes) => `
+  <div style="font-family: Arial, sans-serif; background: #0a0c10; color: #ffffff; max-width: 560px; margin: 0 auto; padding: 32px; border-radius: 16px;">
+    <p style="color: #DE984B; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">SSGI RP-LEO System</p>
+    <h1 style="font-size: 24px; margin: 12px 0;">Verify your email</h1>
+    <p style="color: #cbd5e1; line-height: 1.6;">Hello ${escapeHtml(name)}, use this code to activate your account:</p>
+    <div style="margin: 24px 0; padding: 18px; text-align: center; background: #111827; border: 1px solid #DE984B; border-radius: 10px; color: #DE984B; font-size: 30px; font-weight: 700; letter-spacing: 8px;">${escapeHtml(code)}</div>
+    <p style="color: #94a3b8; font-size: 13px;">This code expires in ${escapeHtml(expiresInMinutes)} minutes. Do not share it with anyone.</p>
+  </div>
+`;
+
 export const getMouSubmittedTemplate = (partnerName, country, description, mouId, creatorName) => `
   <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0c10; color: #ffffff; padding: 32px; border-radius: 16px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
     <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 24px;">

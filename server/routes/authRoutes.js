@@ -4,6 +4,8 @@ import {
   registerUser,
   loginUser,
   updateUser,
+  verifyEmailOtp,
+  resendEmailOtp,
 } from "../controllers/authController.js";
 
 const router = express.Router();
@@ -15,6 +17,8 @@ const router = express.Router();
 */
 router.post("/register", registerUser);
 router.post("/login", loginUser);
+router.post("/verify-email", verifyEmailOtp);
+router.post("/resend-verification", resendEmailOtp);
 router.put("/update", auth, updateUser);
 
 export default router;

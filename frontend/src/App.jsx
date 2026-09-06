@@ -15,6 +15,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Volunteer from './pages/Volunteer';
 import Register from './pages/Register';
+import VerifyEmail from './pages/VerifyEmail';
 import Registry from './pages/Registry';
 import EARoad from './pages/EARoad';
 import InitiateMoU from './pages/InitiateMoU';
@@ -103,6 +104,7 @@ export default function App() {
               <Route path="/opportunities" element={<Opportunities />} />
               <Route path="/ea-road" element={<EARoad />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/verify-email" element={<VerifyEmail />} />
 
 
               {/* SETTINGS - ALL AUTHENTICATED USERS */}
