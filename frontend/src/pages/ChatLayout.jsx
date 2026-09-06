@@ -27,7 +27,6 @@ import {
   Archive,
   Inbox as InboxIcon,
   Plus,
-  Hash,
   Home,
 } from "lucide-react";
 
@@ -191,8 +190,9 @@ const ConversationItem = ({ chat, active, onClick }) => {
             className={`text-sm truncate ${
               active ? "text-white font-black" : "text-slate-100 font-bold"
             }`}
+            title={partnerLabel}
           >
-            {otherName}
+            {partnerLabel}
           </h3>
           <span
             className={`text-[10px] font-mono shrink-0 ${
@@ -204,13 +204,11 @@ const ConversationItem = ({ chat, active, onClick }) => {
         </div>
 
         <div className="flex items-center gap-1.5 mt-0.5">
-          <Hash size={9} className="text-slate-600 shrink-0" />
+          <User size={10} className="text-slate-600 shrink-0" />
           <span
-            className={`text-[9px] font-black uppercase tracking-[0.16em] truncate ${
-              isAdminLast ? "text-emerald-400" : "text-slate-500"
-            }`}
+            className="text-[10px] font-bold tracking-wide truncate text-slate-400"
           >
-            {partnerLabel}
+            {otherName}
           </span>
         </div>
 
@@ -242,11 +240,11 @@ const ConversationItem = ({ chat, active, onClick }) => {
  * Message bubble — own / partner / admin variants
  * ============================================================ */
 
-const MessageBubble = ({ msg, mine, prevMine, nextMine, isAdmin }) => {
+const MessageBubble = ({ msg, mine, prevSameSender, nextSameSender, isAdmin, senderName, viewerName }) => {
   const time = formatBubbleTime(msg.created_at || msg.createdAt);
   const isRead = !!msg.read_at;
-  const isFirstInGroup = !prevMine;
-  const isLastInGroup = !nextMine;
+  const isFirstInGroup = !prevSameSender;
+  const isLastInGroup = !nextSameSender;
 
   // Shape the corner that points to the "tail" of the bubble
   const radius = mine
@@ -268,7 +266,7 @@ const MessageBubble = ({ msg, mine, prevMine, nextMine, isAdmin }) => {
         {!mine && isFirstInGroup && (
           <div className="self-end mb-1">
             <Avatar
-              name={msg.sender || "Unknown user"}
+              name={senderName}
               size={26}
             />
           </div>
@@ -291,14 +289,14 @@ const MessageBubble = ({ msg, mine, prevMine, nextMine, isAdmin }) => {
             }
           `}
         >
-          {/* Sender name above first bubble in a group (other side only) */}
-          {!mine && isFirstInGroup && (
+          {/* Keep the author visible at the start of every message group. */}
+          {isFirstInGroup && (
             <div
               className={`text-[10px] font-black uppercase tracking-[0.18em] mb-0.5 ${
-                isAdmin ? "text-[#DE984B]" : "text-[#00A8B5]"
+                mine ? "text-sky-200" : isAdmin ? "text-[#DE984B]" : "text-[#00A8B5]"
               }`}
             >
-              {msg.sender || "Unknown user"}
+              {mine ? `You · ${viewerName}` : senderName}
             </div>
           )}
 
@@ -556,33 +554,71 @@ const ChatPanel = ({ mouId, onBack }) => {
   const isAdminViewer =
     user?.role === "admin" || user?.role === "executive";
 
+  // The MoU contact may be intentionally anonymized, but messages retain the
+  // participant's display name. Prefer that real name in the chat header.
+  const otherParticipantName = useMemo(() => {
+    const viewerIsAdmin = ["admin", "executive"].includes(
+      String(user?.role || "").toLowerCase()
+    );
+    const myName = getDisplayName(user, { fallback: "" }).toLowerCase();
+
+    const counterpart = messages.find((message) => {
+      const role = String(message.sender_role || message.senderRole || "").toLowerCase();
+      const sender = String(message.sender || "").trim().toLowerCase();
+      if (!sender || isAnonymousLabel(sender)) return false;
+      if (role) {
+        const senderIsAdmin = ["admin", "executive"].includes(role);
+        return viewerIsAdmin ? !senderIsAdmin : senderIsAdmin;
+      }
+      return sender !== myName;
+    });
+
+    return counterpart
+      ? getDisplayName(
+          { name: counterpart.sender },
+          { fallback: "", role: counterpart.sender_role || counterpart.senderRole }
+        )
+      : "";
+  }, [messages, user]);
+
   const otherName = useMemo(() => {
+    if (otherParticipantName) return otherParticipantName;
     if (isAdminViewer) {
+      const contactName = mouMeta?.contact_person || mouMeta?.created_by_name;
       return getDisplayName(
         {
-          name:
-            mouMeta?.contact_person ||
-            mouMeta?.created_by_name ||
-            mouMeta?.partnerName,
+          name: isAnonymousLabel(contactName) ? mouMeta?.partnerName : contactName,
         },
-        { fallback: "Unknown user" }
+        { fallback: "Partner" }
       );
     }
+    const adminName = mouMeta?.created_by_name || mouMeta?.contact_person;
     return getDisplayName(
       {
-        name:
-          mouMeta?.created_by_name ||
-          mouMeta?.contact_person,
+        name: isAnonymousLabel(adminName) ? mouMeta?.partnerName : adminName,
       },
-      { fallback: "Admin" }
+      { fallback: mouMeta?.partnerName || "Admin" }
     );
-  }, [isAdminViewer, mouMeta]);
+  }, [isAdminViewer, mouMeta, otherParticipantName]);
+
+  const companyName = mouMeta?.partnerName || "Partnership Chat";
 
   const isMine = useCallback((msg) => {
     if (msg._pending) return true;
     if (!user) return false;
 
-    // Primary: match by sender name against the current user's name
+    // Messages are positioned by their role first. Names can change and older
+    // messages may not include one, while a role remains stable for a chat.
+    const senderRole = String(msg.sender_role || msg.senderRole || "").toLowerCase();
+    const viewerIsAdmin = ["admin", "executive"].includes(
+      String(user.role || "").toLowerCase()
+    );
+    if (senderRole) {
+      const senderIsAdmin = ["admin", "executive"].includes(senderRole);
+      return viewerIsAdmin ? senderIsAdmin : !senderIsAdmin;
+    }
+
+    // Fallback for legacy messages without sender_role.
     const myName = (user.name || user.fullName || user.email || "").trim();
     const sender = (msg.sender || "").trim();
     if (myName && sender && myName === sender) return true;
@@ -594,6 +630,18 @@ const ChatPanel = ({ mouId, onBack }) => {
 
     return false;
   }, [user]);
+
+  const viewerName = useMemo(
+    () => getDisplayName(user, { fallback: "You", role: user?.role }),
+    [user]
+  );
+
+  const getSenderName = useCallback((msg) => {
+    return getDisplayName(
+      { name: msg.sender },
+      { fallback: "Unknown user", role: msg.sender_role || msg.senderRole }
+    );
+  }, []);
 
   // Build list with date separators
   const rendered = useMemo(() => {
@@ -612,13 +660,20 @@ const ChatPanel = ({ mouId, onBack }) => {
         mine: isMine(m),
         isAdmin:
           m.sender_role === "admin" || m.sender_role === "executive",
-        prevMine: i > 0 && isMine(messages[i - 1]),
-        nextMine: i < messages.length - 1 && isMine(messages[i + 1]),
+        senderName: getSenderName(m),
+        prevSameSender:
+          i > 0 &&
+          isMine(messages[i - 1]) === isMine(m) &&
+          getSenderName(messages[i - 1]) === getSenderName(m),
+        nextSameSender:
+          i < messages.length - 1 &&
+          isMine(messages[i + 1]) === isMine(m) &&
+          getSenderName(messages[i + 1]) === getSenderName(m),
         key: m.id || m._id || `m-${i}`,
       });
     });
     return out;
-  }, [messages, isMine]);
+  }, [messages, isMine, getSenderName]);
 
   return (
     <div className="flex flex-col h-full bg-[#0A0F17] relative">
@@ -638,9 +693,9 @@ const ChatPanel = ({ mouId, onBack }) => {
           <div className="flex-1 min-w-0">
             <h2
               className="text-sm font-black text-white truncate"
-              title={otherName}
+              title={companyName}
             >
-              {otherName}
+              {companyName}
             </h2>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span
@@ -659,11 +714,11 @@ const ChatPanel = ({ mouId, onBack }) => {
               >
                 {connectionStatus === "connected" ? "online" : "offline"}
               </span>
-              {mouMeta?.partnerName && (
+              {otherName && (
                 <>
                   <span className="text-slate-700 mx-1">•</span>
-                  <span className="text-[10px] text-slate-500 uppercase tracking-[0.16em] truncate">
-                    {mouMeta.partnerName}
+                  <span className="text-[10px] text-slate-400 font-bold tracking-wide truncate">
+                    {otherName}
                   </span>
                 </>
               )}
@@ -714,8 +769,10 @@ const ChatPanel = ({ mouId, onBack }) => {
                     msg={item.msg}
                     mine={item.mine}
                     isAdmin={item.isAdmin}
-                    prevMine={item.prevMine}
-                    nextMine={item.nextMine}
+                    prevSameSender={item.prevSameSender}
+                    nextSameSender={item.nextSameSender}
+                    senderName={item.senderName}
+                    viewerName={viewerName}
                   />
                 )
               )}

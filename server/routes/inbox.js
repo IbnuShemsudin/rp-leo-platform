@@ -146,29 +146,22 @@ router.get("/", auth, async (req, res) => {
           (p) => p && p !== currentUserEmail && p !== currentUserId
         ) || null;
 
-      // Resolve display name with a clear priority:
-      // 1. Looked-up user name from users table
-      // 2. mou.contact_person (the named contact on the MoU)
-      // 3. mou.created_by_name (who created the MoU)
-      // 4. mou.partnerName (organization name as last resort)
-      // 5. Raw otherParty value (email/id)
-      // 6. "Unknown user"
+      // Resolve display name with a clear priority. Message sender is first:
+      // it is the conversation participant, while MoU contact fields may be
+      // intentionally anonymized for privacy.
       let displayName = "Unknown user";
       if (otherPartyRaw && usersByName.has(otherPartyRaw)) {
         displayName = usersByName.get(otherPartyRaw);
+      } else if (otherPartyRaw && otherPartyRaw.toLowerCase() !== "unknown user") {
+        displayName = otherPartyRaw.includes("@")
+          ? otherPartyRaw.split("@")[0]
+          : otherPartyRaw;
       } else if (mou.contact_person) {
         displayName = mou.contact_person;
       } else if (mou.created_by_name) {
         displayName = mou.created_by_name;
       } else if (mou.partnerName) {
         displayName = mou.partnerName;
-      } else if (otherPartyRaw) {
-        // If it looks like an email, extract the local part
-        if (otherPartyRaw.includes("@")) {
-          displayName = otherPartyRaw.split("@")[0];
-        } else {
-          displayName = otherPartyRaw;
-        }
       }
 
       return {

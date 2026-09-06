@@ -106,6 +106,8 @@ export const registerUser = async (req, res) => {
       {
         id: user.id,
         role: user.role,
+        name: user.name,
+        email: user.email,
       },
       process.env.JWT_SECRET || "supersecretkey",
       {
@@ -253,6 +255,8 @@ export const loginUser = async (req, res) => {
       {
         id: user.id,
         role: user.role,
+        name: user.name,
+        email: user.email,
       },
       process.env.JWT_SECRET || "supersecretkey",
       {
