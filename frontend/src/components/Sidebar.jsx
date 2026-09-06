@@ -14,7 +14,8 @@ import {
   Crown,
   User,
   Power,
-  MessageSquare // 1. Imported for Messages Module
+  MessageSquare, // 1. Imported for Messages Module
+  ClipboardList // Audit log
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -30,6 +31,7 @@ export default function Sidebar() {
     { label: 'Messages', path: '/messages', icon: MessageSquare, roles: ['admin','staff'], description: 'Secure Communications' },
     { label: 'EA-ROAD Projects', path: '/projects', icon: Radio, roles: ['admin','staff'], description: 'Regional Initiatives' },
     { label: 'Settings', path: '/settings', icon: Settings, roles: ['admin','staff'], description: 'System Configuration' },
+    { label: 'Audit Log', path: '/audit', icon: ClipboardList, roles: ['admin'], description: 'System Activity Trail' },
   ];
 
   return (
@@ -40,22 +42,22 @@ export default function Sidebar() {
     >
 
       {/* Enhanced Background Effects */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-rp-blue/10 rounded-full blur-[60px] pointer-events-none animate-pulse" />
-      <div className="absolute bottom-0 left-0 w-24 h-24 bg-rp-gold/8 rounded-full blur-[40px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-32 h-32 bg-rp-teal/12 rounded-full blur-[60px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-rp-gold-accent/10 rounded-full blur-[40px] pointer-events-none" />
 
       {/* Subtle Tech Pattern */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-full h-full border-[0.5px] border-rp-blue/30 rounded-full"></div>
-        <div className="absolute top-[20%] right-[-10%] w-1/2 h-1/2 border-[0.5px] border-rp-gold/20 rounded-full"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-full h-full border-[0.5px] border-rp-teal/30 rounded-full"></div>
+        <div className="absolute top-[20%] right-[-10%] w-1/2 h-1/2 border-[0.5px] border-rp-gold-accent/20 rounded-full"></div>
       </div>
       
       {/* Header */}
       <div className="mb-10 flex items-center justify-between relative z-10">
         {!collapsed && (
           <div className="group cursor-pointer">
-            <div className="absolute -inset-2 bg-gradient-to-r from-rp-blue/20 to-rp-gold/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="absolute -inset-2 bg-gradient-to-r from-rp-teal/20 to-rp-gold-accent/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <div className="relative">
-              <h2 className="text-rp-gold font-black text-xs uppercase tracking-widest group-hover:text-white transition-colors">
+              <h2 className="text-rp-gold-accent font-black text-xs uppercase tracking-widest group-hover:text-white transition-colors">
                 RP-LEO Admin
               </h2>
               <p className="text-[10px] text-gray-400 font-bold uppercase mt-1 group-hover:text-gray-300 transition-colors">
@@ -70,9 +72,9 @@ export default function Sidebar() {
           onClick={() => setCollapsed(!collapsed)}
           className={`p-2 rounded-lg hover:bg-white/10 transition-all hover:scale-110 active:scale-95 group relative ${collapsed ? 'mx-auto' : ''}`}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-rp-blue/20 to-rp-gold/20 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-rp-teal/20 to-rp-gold-accent/20 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <div className="relative">
-            {collapsed ? <ChevronRight size={16} className="text-rp-blue group-hover:text-rp-gold transition-colors" /> : <ChevronLeft size={16} className="text-rp-blue group-hover:text-rp-gold transition-colors" />}
+            {collapsed ? <ChevronRight size={16} className="text-rp-teal group-hover:text-rp-gold-accent transition-colors" /> : <ChevronLeft size={16} className="text-rp-teal group-hover:text-rp-gold-accent transition-colors" />}
           </div>
         </button>
       </div>
@@ -83,23 +85,26 @@ export default function Sidebar() {
           .filter(item => item.roles.includes(user?.role))
           .map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path;
+            const isActive =
+              item.path === "/messages"
+                ? location.pathname.startsWith("/messages")
+                : location.pathname === item.path;
             return (
               <div key={item.path} className="relative group">
                 {isActive && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-rp-blue/20 to-rp-gold/20 rounded-xl blur opacity-75"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-rp-teal/20 to-rp-gold-accent/20 rounded-xl blur opacity-75"></div>
                 )}
                 <button
                   type="button"
                   onClick={() => navigate(item.path)}
                   className={`relative w-full flex items-center gap-4 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all group/btn ${
                     isActive
-                      ? 'bg-gradient-to-r from-rp-blue to-rp-gold text-white shadow-lg shadow-rp-blue/30'
+                      ? 'bg-gradient-to-r from-rp-teal to-rp-gold-accent text-white shadow-lg shadow-rp-teal/30'
                       : 'text-gray-400 hover:text-white hover:bg-white/10 hover:shadow-md hover:shadow-white/10'
                   } ${collapsed ? 'justify-center' : ''}`}
                   title={collapsed ? item.label : undefined}
                 >
-                  <Icon size={18} className={`${isActive ? 'text-white' : 'text-rp-blue group-hover/btn:text-rp-gold'} transition-colors shrink-0`} />
+                  <Icon size={18} className={`${isActive ? 'text-white' : 'text-rp-teal group-hover/btn:text-rp-gold-accent'} transition-colors shrink-0`} />
                   {!collapsed && (
                     <div className="flex flex-col items-start text-left">
                       <span className="leading-tight">{item.label}</span>
@@ -121,11 +126,11 @@ export default function Sidebar() {
       {user?.role === 'admin' && (
         <div className="pt-6 mt-6 border-t border-white/10 relative z-10">
           <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-rp-gold/20 to-rp-blue/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-rp-gold-accent/20 to-rp-teal/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <button
               type="button"
               onClick={() => navigate('/register')}
-              className={`relative w-full flex items-center gap-4 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider border border-rp-gold/30 text-rp-gold hover:bg-gradient-to-r hover:from-rp-gold hover:to-rp-blue hover:text-white hover:border-transparent transition-all hover:shadow-lg hover:shadow-rp-gold/20 group/btn ${collapsed ? 'justify-center' : ''}`}
+              className={`relative w-full flex items-center gap-4 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider border border-rp-gold-accent/30 text-rp-gold-accent hover:bg-gradient-to-r hover:from-rp-gold-accent hover:to-rp-teal hover:text-white hover:border-transparent transition-all hover:shadow-lg hover:shadow-rp-gold-accent/20 group/btn ${collapsed ? 'justify-center' : ''}`}
               title={collapsed ? 'Add Staff' : undefined}
             >
               <Crown size={16} className="group-hover/btn:scale-110 transition-transform shrink-0" />
@@ -139,12 +144,12 @@ export default function Sidebar() {
       {/* User Profile Footer */}
       <div className="pt-6 mt-6 border-t border-white/5 relative z-10">
         <div className={`flex items-center gap-3 mb-4 ${collapsed ? 'justify-center' : ''}`}>
-          <div className="w-9 h-9 rounded-xl bg-rp-blue flex items-center justify-center text-xs font-black shrink-0 shadow-inner">
+          <div className="w-9 h-9 rounded-xl bg-rp-teal flex items-center justify-center text-xs font-black shrink-0 shadow-inner">
             {user?.name?.charAt(0) || 'U'}
           </div>
 
           {!collapsed && (
-            <div className="overflow-hidden">
+            <div className="overflow-hidden flex-1">
               <p className="text-[10px] font-black uppercase truncate">
                 {user?.name || 'Authorized User'}
               </p>

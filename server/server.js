@@ -16,6 +16,8 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import messageRoutes from "./routes/messages.js";
 import inboxRoutes from "./routes/inbox.js";
+import auditRoutes from "./routes/auditRoutes.js";
+import { startAuditWorker } from "./utils/auditQueue.js";
 
 
 // Fix __dirname in ES Modules
@@ -26,6 +28,15 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+/*import { sendEmailNotification } from "./utils/email.js";
+
+// Emergency test on server boot:
+sendEmailNotification({
+  to: "isrubest18@gmail.com",
+  subject: "TEST EMAIL ON BOOT",
+  htmlContent: "<h1>If you get this, Nodemailer is working!</h1>",
+}).then(() => console.log("✅ BOOT EMAIL FINISHED"))
+  .catch((err) => console.error("❌ BOOT EMAIL FAILED:", err));*/
 /*
 ========================
  ENSURE UPLOADS FOLDER EXISTS
@@ -156,6 +167,8 @@ app.use("/api/messages", messageRoutes);
 
 app.use("/api/inbox", inboxRoutes);
 
+app.use("/api/audit", auditRoutes);
+
 /*
 ========================
  TEST PDF ROUTE
@@ -226,6 +239,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
+  startAuditWorker();
   console.log("-----------------------------------------");
   console.log(`🚀 RP-LEO Server running on port ${PORT}`);
   console.log(

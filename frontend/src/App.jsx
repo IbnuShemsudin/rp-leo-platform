@@ -24,6 +24,7 @@ import GlobalFooter from './components/Footer';
 import Settings from './pages/Settings';
 import Inbox from './pages/Inbox';
 import Messages from './pages/Messages';
+import AuditLog from './pages/AuditLog';
 
 /* =========================
    AUTH GUARDS
@@ -185,6 +186,16 @@ export default function App() {
                 element={
                   <RoleRoute allowedRoles={['admin']}>
                     <Register />
+                  </RoleRoute>
+                }
+              />
+
+              {/* AUDIT LOG - ADMIN ONLY */}
+              <Route
+                path="/audit"
+                element={
+                  <RoleRoute allowedRoles={['admin']}>
+                    <AuditLog />
                   </RoleRoute>
                 }
               />

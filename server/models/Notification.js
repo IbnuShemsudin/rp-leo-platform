@@ -25,6 +25,18 @@ const NotificationSchema = {
     type: Boolean,
     default: false,
   },
+
+  role: {
+    type: String,
+  },
+
+  user_id: {
+    type: String,
+  },
+
+  link: {
+    type: String,
+  },
 };
 
 /*

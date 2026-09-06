@@ -119,7 +119,7 @@ const MoU = {
       .from("mous")
       .insert([
         {
-          partner_name: payload.partnerName,
+          partnerName: payload.partnerName,
           country: payload.country,
           sector: payload.sector,
           description: payload.description,
