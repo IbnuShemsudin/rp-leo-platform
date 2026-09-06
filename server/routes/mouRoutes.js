@@ -543,6 +543,67 @@ router.put("/update/:id", auth, async (req, res) => {
       }
     }
 
+    // Email the partner only when an admin/executive actually changes status.
+    // Do not send this partner notification to administrative accounts.
+    if (statusChanged && (existingMou?.contact_email || partnerUserId)) {
+      try {
+        let contactUser = null;
+        let contactUserError = null;
+
+        if (existingMou.contact_email) {
+          ({ data: contactUser, error: contactUserError } = await supabase
+            .from("users")
+            .select("email, role")
+            .eq("email", existingMou.contact_email)
+            .maybeSingle());
+        }
+
+        if (contactUserError) {
+          console.warn("Partner email role lookup failed:", contactUserError.message);
+        }
+
+        const contactIsAdmin = ["admin", "executive"].includes(
+          String(contactUser?.role || "").toLowerCase()
+        );
+
+        let recipientEmail = existingMou.contact_email;
+
+        // Some older MoUs have no contact email. Use the initiating partner's
+        // account email as a safe fallback, but never notify admin/executive.
+        if (!recipientEmail && partnerUserId) {
+          const { data: creator } = await supabase
+            .from("users")
+            .select("email, role")
+            .eq("id", partnerUserId)
+            .maybeSingle();
+          if (!["admin", "executive"].includes(String(creator?.role || "").toLowerCase())) {
+            recipientEmail = creator?.email || null;
+          }
+        }
+
+        if (!contactIsAdmin && recipientEmail) {
+          const frontendUrl = (
+            process.env.FRONTEND_URL || "https://rp-leo-platform.vercel.app"
+          ).replace(/\/$/, "");
+          const mouUrl = `${frontendUrl}/messages/${data.id}`;
+
+          await sendEmailNotification({
+            to: recipientEmail,
+            subject: `[RP-LEO System] MoU status updated: ${existingMou.partnerName}`,
+            htmlContent: getMouStatusTemplate(
+              existingMou.partnerName,
+              status,
+              currentStep,
+              mouUrl,
+            ),
+          });
+        }
+      } catch (emailErr) {
+        // The update must remain successful even if an external email service fails.
+        console.error("Partner status email notification failed:", emailErr.message);
+      }
+    }
+
     return res.json({ success: true, data });
   } catch (err) {
     return res

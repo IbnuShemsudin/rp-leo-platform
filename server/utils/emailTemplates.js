@@ -50,7 +50,7 @@ export const getMouSignedTemplate = (partnerName, contactPerson, mouId, signedDa
   </div>
 `;
 
-export const getMouStatusTemplate = (partnerName, newStatus, currentStep) => `
+export const getMouStatusTemplate = (partnerName, newStatus, currentStep, mouUrl) => `
   <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0c10; color: #ffffff; padding: 32px; border-radius: 16px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
     <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 24px;">
       <span style="color: #DE984B; font-size: 11px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">SSGI RP-LEO System</span>
@@ -63,5 +63,13 @@ export const getMouStatusTemplate = (partnerName, newStatus, currentStep) => `
       <p style="margin: 0 0 8px 0; font-size: 14px;"><strong style="color: #DE984B;">New Status:</strong> ${escapeHtml(newStatus)}</p>
       <p style="margin: 0; font-size: 14px;"><strong style="color: #DE984B;">Current Step:</strong> Step ${currentStep} of 7</p>
     </div>
+
+    ${mouUrl ? `
+      <div style="margin: 28px 0 8px 0;">
+        <a href="${escapeHtml(mouUrl)}" style="display: inline-block; background: #DE984B; color: #111827; padding: 13px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none;">View your MoU</a>
+      </div>
+    ` : ""}
+
+    <p style="color: #64748b; font-size: 12px; margin-top: 24px;">This is an automated notification from the SSGI Regional Partnership platform.</p>
   </div>
 `;

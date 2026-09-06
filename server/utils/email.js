@@ -4,12 +4,25 @@ import nodemailer from "nodemailer";
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || "smtp.gmail.com",
   port: Number(process.env.EMAIL_PORT) || 587,
-  secure: false, // true for port 465, false for port 587
+  secure: Number(process.env.EMAIL_PORT) === 465,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
+
+// SMTP verification is network-expensive. Verify once per server process,
+// rather than once for every notification recipient.
+let verificationPromise = null;
+const verifyTransporter = async () => {
+  if (!verificationPromise) {
+    verificationPromise = transporter.verify().catch((error) => {
+      verificationPromise = null;
+      throw error;
+    });
+  }
+  return verificationPromise;
+};
 
 export const sendEmailNotification = async ({ to, subject, htmlContent }) => {
   try {
@@ -25,8 +38,7 @@ export const sendEmailNotification = async ({ to, subject, htmlContent }) => {
       html: htmlContent,
     };
 
-    // Verify transporter connection first
-    await transporter.verify();
+    await verifyTransporter();
     console.log("⚡ SMTP Connection Verified!");
 
     const info = await transporter.sendMail(mailOptions);
