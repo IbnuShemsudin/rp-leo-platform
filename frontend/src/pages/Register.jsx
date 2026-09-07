@@ -1,7 +1,6 @@
 // src/pages/Register.jsx
 
 import React, { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import {
   ChevronDown,
@@ -28,7 +27,6 @@ export default function Register() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -54,14 +52,16 @@ export default function Register() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess('Identity initialized successfully! Redirecting...');
-
-        login(data.user, data.token);
+        setSuccess('Verification code sent. Redirecting...');
 
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/verify-email', { state: { email: data.email || formData.email } });
         }, 1500);
       } else {
+        if (data.verificationRequired) {
+          navigate('/verify-email', { state: { email: formData.email } });
+          return;
+        }
         setError(data.msg || 'Registration failed');
       }
     } catch (err) {
