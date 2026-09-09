@@ -13,8 +13,7 @@ export const createNotifyHelpers = ({
 } = {}) => {
   /**
    * Fetch all users with role "admin".
-   * Returns an array of { id, name, email } objects.
-   * Filters out users with missing or invalid email addresses.
+    * Returns an array of { id, name, email } objects.
    */
   const getAdminUsers = async () => {
     const { data, error } = await supabaseClient
@@ -27,9 +26,7 @@ export const createNotifyHelpers = ({
       return [];
     }
 
-    return (data || []).filter(
-      (u) => u.email && typeof u.email === "string" && u.email.includes("@")
-    );
+    return (data || []).filter((u) => u.id);
   };
 
   /**
@@ -78,7 +75,9 @@ export const createNotifyHelpers = ({
       return;
     }
 
-    const recipients = admins.filter((admin) => admin.id !== skipUserId);
+    const recipients = admins
+      .filter((admin) => admin.id !== skipUserId)
+      .filter((admin) => admin.email && admin.email.includes("@"));
 
     if (recipients.length === 0) {
       console.warn("⚠️ All admin users are the creator — no emails to send");
