@@ -29,9 +29,7 @@ export default function NotificationBell() {
     if (!token) return;
     try {
       await markNotificationAsRead(id, token);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-      );
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
     } catch (error) {
       console.error("Failed to mark as read", error);
     }
@@ -44,7 +42,11 @@ export default function NotificationBell() {
     const loadNotifications = async () => {
       try {
         const data = await getNotifications(token);
-        if (active) setNotifications(Array.isArray(data) ? data : []);
+        if (active) {
+          setNotifications(
+            Array.isArray(data) ? data.filter((notification) => !notification.read) : []
+          );
+        }
       } catch (error) {
         console.error("Error fetching notifications:", error);
         if (active) setNotifications([]);

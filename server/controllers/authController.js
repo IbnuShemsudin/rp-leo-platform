@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { supabase } from "../config/supabase.js";
-import { sendEmailNotification } from "../utils/email.js";
+import { sendOtpEmail } from "../utils/brevoEmail.js";
 import { getEmailVerificationTemplate } from "../utils/emailTemplates.js";
 
 /*
@@ -395,7 +395,7 @@ const issueEmailOtp = async (user) => {
 
   if (error) throw new Error(error.message);
 
-  await sendEmailNotification({
+  await sendOtpEmail({
     to: user.email,
     subject: "Your RP-LEO email verification code",
     htmlContent: getEmailVerificationTemplate(user.name, code, OTP_EXPIRY_MINUTES),
