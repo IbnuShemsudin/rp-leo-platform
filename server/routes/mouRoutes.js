@@ -333,6 +333,17 @@ router.get("/stats", auth, async (req, res) => {
     const mous = data || [];
     const total = mous.length;
 
+    // Count verified partner accounts that can use the web application.
+    const { count: partnerCount, error: partnerError } = await supabase
+      .from("users")
+      .select("id", { count: "exact", head: true })
+      .in("role", ["staff", "partner"])
+      .eq("email_verified", true);
+
+    if (partnerError) {
+      console.warn("⚠️ Partner count unavailable:", partnerError.message);
+    }
+
     // --- byStatus ---
     const byStatus = {};
     for (const m of mous) {
@@ -398,6 +409,7 @@ router.get("/stats", auth, async (req, res) => {
     return res.json({
       success: true,
       total,
+      partnerCount: partnerError ? 0 : partnerCount || 0,
       byStatus,
       byCountry,
       bySector,

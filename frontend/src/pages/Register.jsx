@@ -14,6 +14,8 @@ import {
   Loader2
 } from 'lucide-react';
 
+const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+
 export default function Register() {
   const [formData, setFormData] = useState({
     name: '',
@@ -35,6 +37,12 @@ export default function Register() {
     setIsSubmitting(true);
     setError('');
     setSuccess('');
+
+    if (!strongPasswordPattern.test(formData.password)) {
+      setError('Password must be at least 8 characters and include uppercase, lowercase, number, and special character.');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       // ✅ FIXED: Replaced single quotes with template backticks and isolated the environment lookup variable correctly
@@ -168,7 +176,7 @@ export default function Register() {
           <Input
             label="Security Cipher"
             type="password"
-            placeholder="••••••••"
+            placeholder="Min. 8 chars: Aa1!"
             icon={<Lock size={18} className="text-gray-400" />}
             value={formData.password}
             onChange={(e) =>

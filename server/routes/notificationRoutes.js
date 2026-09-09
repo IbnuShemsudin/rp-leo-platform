@@ -9,11 +9,12 @@ const router = express.Router();
 router.get("/", auth, async (req, res) => {
   try {
     const userId = req.user.id;
+    console.log("🔍 GET /notifications | userId:", userId);
 
     const { data, error } = await supabase
       .from("notifications")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", String(userId))
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -25,6 +26,7 @@ router.get("/", auth, async (req, res) => {
       });
     }
 
+    console.log("📬 Returning", data?.length || 0, "notifications for user", userId);
     return res.json(data || []);
   } catch (err) {
     console.error("💥 Notifications crash:", err);
@@ -43,13 +45,16 @@ router.patch("/:id/read", auth, async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
+    console.log("🔍 PATCH /notifications/:id/read | id:", id, "| userId:", userId, "| types:", typeof id, typeof userId);
+
     const { data, error } = await supabase
       .from("notifications")
       .update({ read: true })
-      .eq("id", id)
-      .eq("user_id", userId)
-      .select()
-      .single();
+      .eq("id", String(id))
+      .eq("user_id", String(userId))
+      .select();
+
+    console.log("📝 Supabase update result | data:", data, "| error:", error);
 
     if (error) {
       console.error("❌ Mark notification read error:", error);
@@ -60,9 +65,17 @@ router.patch("/:id/read", auth, async (req, res) => {
       });
     }
 
+    if (!data || data.length === 0) {
+      console.warn("⚠️ No rows updated for notification", id, "user", userId);
+      return res.status(404).json({
+        success: false,
+        message: "Notification not found or not owned by user",
+      });
+    }
+
     return res.json({
       success: true,
-      data,
+      data: data[0],
     });
   } catch (err) {
     console.error("💥 Mark notification read crash:", err);

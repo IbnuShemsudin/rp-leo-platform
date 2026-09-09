@@ -60,11 +60,27 @@ router.get("/", auth, async (req, res) => {
     // Group by mou_id and capture the latest message, all distinct
     // senders, and the count of unread messages (read_at IS NULL).
     const grouped = new Map();
+    const viewerIsAdmin =
+      req.user?.role === "admin" || req.user?.role === "executive";
+    const viewerIdentifiers = new Set(
+      [req.user?.id, req.user?.email, req.user?.name]
+        .filter(Boolean)
+        .map((value) => String(value).trim().toLowerCase())
+    );
     for (const msg of messages || []) {
       const key = msg.mou_id;
       if (!key) continue;
       const existing = grouped.get(key);
-      const isUnread = !msg.read_at;
+      const messageSender = String(msg.sender || "").trim().toLowerCase();
+      const senderRole = String(msg.sender_role || msg.senderRole || "").toLowerCase();
+      const hasKnownSenderRole = senderRole === "admin" ||
+        senderRole === "executive" || senderRole === "staff" || senderRole === "partner";
+      const messageIsFromViewer = hasKnownSenderRole
+        ? (viewerIsAdmin
+          ? senderRole === "admin" || senderRole === "executive"
+          : senderRole !== "admin" && senderRole !== "executive")
+        : viewerIdentifiers.has(messageSender);
+      const isUnread = !msg.read_at && !messageIsFromViewer;
       if (!existing) {
         grouped.set(key, {
           mouId: key,

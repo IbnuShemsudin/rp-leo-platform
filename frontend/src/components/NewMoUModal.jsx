@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { X, Send, ChevronRight, Loader2, Upload, CheckCircle, FileText, AlertCircle, Building2, MapPin, Target, DollarSign, Calendar, FileCheck } from 'lucide-react';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function NewMoUModal({ isOpen, onClose, onRefresh }) {
   const { token, logout } = useAuth();
   const [step, setStep] = useState(1);
@@ -97,7 +99,7 @@ export default function NewMoUModal({ isOpen, onClose, onRefresh }) {
     fileData.append('file', file);
 
     try {
-      const res = await fetch('http://import.meta.env.VITE_API_URL/api/upload', {
+      const res = await fetch(`${API}/api/upload/pdf`, {
         method: 'POST',
         headers: {
           'x-auth-token': token
@@ -141,7 +143,7 @@ export default function NewMoUModal({ isOpen, onClose, onRefresh }) {
     setSubmitError('');
 
     try {
-      const res = await fetch('http://import.meta.env.VITE_API_URL/api/mou/register', {
+      const res = await fetch(`${API}/api/mou/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -166,7 +166,7 @@ const ConversationItem = ({ chat, active, onClick }) => {
     chat.lastMessage?.created_at || chat.lastMessage?.createdAt
   );
 
-  const unread = chat.unreadCount || 0;
+  const unread = Number(chat.unreadCount || 0);
 
   return (
     <button
@@ -188,7 +188,11 @@ const ConversationItem = ({ chat, active, onClick }) => {
         <div className="flex items-center justify-between gap-2">
           <h3
             className={`text-sm truncate ${
-              active ? "text-white font-black" : "text-slate-100 font-bold"
+              active
+                ? "text-white font-black"
+                : unread > 0
+                  ? "text-white font-black"
+                  : "text-slate-100 font-bold"
             }`}
             title={partnerLabel}
           >
@@ -226,7 +230,10 @@ const ConversationItem = ({ chat, active, onClick }) => {
             {lastText}
           </p>
           {unread > 0 && (
-            <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-[#DE984B] text-[#111827] text-[10px] font-black flex items-center justify-center shadow-lg shadow-[#DE984B]/30">
+            <span
+              className="shrink-0 min-w-[22px] h-[22px] px-1.5 rounded-full bg-[#526b86] text-white text-[11px] leading-none font-bold flex items-center justify-center"
+              aria-label={`${unread} unread message${unread === 1 ? "" : "s"}`}
+            >
               {unread > 99 ? "99+" : unread}
             </span>
           )}
@@ -1058,8 +1065,25 @@ export default function ChatLayout() {
     if (token) fetchInbox();
   }, [token, fetchInbox]);
 
+  // Refetch inbox when returning from a chat to the conversation list.
+  // markRead() already updated read_at in Supabase; this ensures the
+  // unreadCount badges reflect the new state.
+  const prevMouId = useRef(mouId);
+  useEffect(() => {
+    const enteredChat = prevMouId.current && !mouId;
+    prevMouId.current = mouId;
+    if (enteredChat && token) {
+      void fetchInbox();
+    }
+  }, [mouId, token, fetchInbox]);
+
   // No auto-refresh in the inbox; match Telegram behavior.
   const handleSelect = (selectedMouId) => {
+    setConversations((prev) =>
+      prev.map((c) =>
+        c.mouId === selectedMouId ? { ...c, unreadCount: 0 } : c
+      )
+    );
     navigate(`/messages/${selectedMouId}`);
   };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Bell, Check } from "lucide-react";
+import { Bell, X } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import {
   getNotifications,
@@ -28,6 +28,7 @@ export default function NotificationBell() {
   const markAsRead = async (id) => {
     if (!token) return;
     try {
+      console.log("Marking notification as read:", id, typeof id);
       await markNotificationAsRead(id, token);
       setNotifications((prev) => prev.filter((n) => n.id !== id));
     } catch (error) {
@@ -118,10 +119,10 @@ export default function NotificationBell() {
                     {!item.read && (
                       <button
                         onClick={() => markAsRead(item.id)}
-                        className="text-gray-400 hover:text-emerald-400"
+                        className="cursor-pointer text-gray-400 hover:text-rose-400"
                         title="Mark as read"
                       >
-                        <Check size={14} />
+                        <X size={14} />
                       </button>
                     )}
                   </div>

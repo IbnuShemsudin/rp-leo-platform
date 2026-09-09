@@ -3,7 +3,14 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { supabase } from "../config/supabase.js";
 import { sendOtpEmail } from "../utils/brevoEmail.js";
-import { getEmailVerificationTemplate } from "../utils/emailTemplates.js";
+import {
+  getEmailVerificationTemplate,
+  getPartnerRegisteredTemplate,
+} from "../utils/emailTemplates.js";
+import {
+  notifyAdminsInApp,
+  notifyAdminsEmail,
+} from "../utils/notifyAdmins.js";
 
 /*
 ROLE SECRET CODES
@@ -37,6 +44,13 @@ export const registerUser = async (req, res) => {
     if (!name || !email || !password || !role) {
       return res.status(400).json({
         msg: "Please provide all required fields",
+      });
+    }
+
+    const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+    if (!strongPasswordPattern.test(password)) {
+      return res.status(400).json({
+        msg: "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.",
       });
     }
 
@@ -108,6 +122,24 @@ export const registerUser = async (req, res) => {
       return res.status(500).json({
         msg: createError.message,
       });
+    }
+
+    if (role === "staff" || role === "partner") {
+      try {
+        await Promise.all([
+          notifyAdminsInApp({
+            title: "New partner registered",
+            message: `${user.name} registered with ${user.email} and is awaiting email verification.`,
+            link: "/dashboard",
+          }),
+          notifyAdminsEmail({
+            subject: "[RP-LEO System] New Partner Registration",
+            htmlContent: getPartnerRegisteredTemplate(user.name, user.email, role),
+          }),
+        ]);
+      } catch (notificationError) {
+        console.error("Admin signup notification error:", notificationError.message);
+      }
     }
 
     try {
