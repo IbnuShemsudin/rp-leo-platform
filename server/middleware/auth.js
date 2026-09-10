@@ -3,8 +3,12 @@ import { supabase } from "../config/supabase.js";
 
 const auth = async (req, res, next) => {
   try {
-    // Get token from header
-    const token = req.header("x-auth-token");
+    // Support both the legacy custom header and standard Bearer auth.
+    const authorization = req.header("authorization");
+    const bearerToken = authorization?.startsWith("Bearer ")
+      ? authorization.slice(7).trim()
+      : null;
+    const token = req.header("x-auth-token") || bearerToken;
 
     // Check if no token
     if (!token) {

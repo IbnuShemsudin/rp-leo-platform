@@ -31,6 +31,7 @@ import {
   FileCheck,
   FileClock,
   Archive,
+  Users,
 } from 'lucide-react';
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -204,6 +205,7 @@ export default function Dashboard() {
     const expired = stats.byStatus?.Expired || 0;
     return [
       { label: 'Total MoUs', value: total, icon: Database, color: 'text-white', accent: '#F59E0B' },
+      { label: 'Partner Users', value: stats.partnerCount || 0, icon: Users, color: 'text-cyan-400', accent: '#00A8B5' },
       { label: 'Active', value: active, icon: Zap, color: 'text-emerald-400', accent: '#10b981' },
       { label: 'Pending Review', value: pending, icon: FileClock, color: 'text-blue-400', accent: '#3b82f6' },
       { label: 'Drafts', value: draft, icon: FileText, color: 'text-yellow-400', accent: '#F59E0B' },
@@ -339,7 +341,7 @@ export default function Dashboard() {
           )}
 
           {/* =================== KPI CARDS =================== */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
             {kpis.map((kpi) => {
               const Icon = kpi.icon;
               return (

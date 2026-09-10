@@ -18,6 +18,20 @@ export const getEmailVerificationTemplate = (name, code, expiresInMinutes) => `
   </div>
 `;
 
+export const getPartnerRegisteredTemplate = (name, email, role) => `
+  <div style="font-family: Arial, sans-serif; background: #0a0c10; color: #ffffff; max-width: 560px; margin: 0 auto; padding: 32px; border-radius: 16px;">
+    <p style="color: #DE984B; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">SSGI RP-LEO System</p>
+    <h1 style="font-size: 24px; margin: 12px 0;">New partner registration</h1>
+    <p style="color: #cbd5e1; line-height: 1.6;">A new partner account has been created and is awaiting email verification.</p>
+    <div style="margin: 24px 0; padding: 18px; background: #111827; border-left: 4px solid #DE984B; border-radius: 10px;">
+      <p style="margin: 0 0 8px;"><strong style="color: #DE984B;">Name:</strong> ${escapeHtml(name)}</p>
+      <p style="margin: 0 0 8px;"><strong style="color: #DE984B;">Email:</strong> ${escapeHtml(email)}</p>
+      <p style="margin: 0;"><strong style="color: #DE984B;">Role:</strong> ${escapeHtml(role)}</p>
+    </div>
+    <p style="color: #64748b; font-size: 12px; margin-top: 32px;">This is an automated notification from the SSGI Regional Partnership platform.</p>
+  </div>
+`;
+
 export const getMouSubmittedTemplate = (partnerName, country, description, mouId, creatorName) => `
   <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0c10; color: #ffffff; padding: 32px; border-radius: 16px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
     <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 24px;">

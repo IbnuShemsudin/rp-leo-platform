@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@getbrevo/brevo": "^6.0.3",
     "@supabase/supabase-js": "^2.105.3",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",

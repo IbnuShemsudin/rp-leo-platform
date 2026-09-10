@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import NotificationBell from './NotificationBell';
 
 
 
@@ -65,6 +66,8 @@ export default function Navbar() {
                   </span>
                   <span className="text-[7px] font-bold text-rp-gold uppercase tracking-[0.3em]">{user.role}</span>
                 </div>
+
+                <NotificationBell />
                 
                 <button 
                   onClick={() => navigate('/initiate')}

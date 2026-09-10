@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Bell, Check, ExternalLink } from "lucide-react";
+import { Bell, X } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import {
+  getNotifications,
+  markNotificationAsRead,
+} from "../services/notificationService";
 
 const timeAgo = (dateStr) => {
   if (!dateStr) return "";
@@ -19,63 +23,41 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const { user } = useAuth();
+  const { token } = useAuth();
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-  // Fetch notifications filtered by role or user_id
-  const fetchNotifications = async () => {
-  const token = localStorage.getItem("token"); // or obtain from your auth context
-  if (!token) {
-    console.warn("⚠️ NotificationBell: no token found");
-    return;
-  }
-
-  try {
-    const response = await fetch(`${API_URL}/api/notifications`, {
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error("❌ Notifications fetch failed:", response.status, errorData);
-      setNotifications([]);
-      return;
+  const markAsRead = async (id) => {
+    if (!token) return;
+    try {
+      console.log("Marking notification as read:", id, typeof id);
+      await markNotificationAsRead(id, token);
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    } catch (error) {
+      console.error("Failed to mark as read", error);
     }
-
-    const data = await response.json();
-    setNotifications(data);
-  } catch (error) {
-    console.error("Error fetching notifications:", error);
-  }
-};
-
-const markAsRead = async (id) => {
-  const token = localStorage.getItem("token");
-  try {
-    await fetch(`${API_URL}/api/notifications/${id}/read`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
-    });
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  } catch (err) {
-    console.error("Failed to mark as read", err);
-  }
-};
+  };
 
   useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 15000); // Poll every 15s
+    if (!token) return undefined;
+
+    let active = true;
+    const loadNotifications = async () => {
+      try {
+        const data = await getNotifications(token);
+        if (active) {
+          setNotifications(
+            Array.isArray(data) ? data.filter((notification) => !notification.read) : []
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+        if (active) setNotifications([]);
+      }
+    };
+
+    void loadNotifications();
+    const interval = setInterval(loadNotifications, 15000); // Poll every 15s
     return () => clearInterval(interval);
-  }, [user]);
+  }, [token]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -87,9 +69,6 @@ const markAsRead = async (id) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  // Mark single notification as read
-  
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -140,10 +119,10 @@ const markAsRead = async (id) => {
                     {!item.read && (
                       <button
                         onClick={() => markAsRead(item.id)}
-                        className="text-gray-400 hover:text-emerald-400"
+                        className="cursor-pointer text-gray-400 hover:text-rose-400"
                         title="Mark as read"
                       >
-                        <Check size={14} />
+                        <X size={14} />
                       </button>
                     )}
                   </div>

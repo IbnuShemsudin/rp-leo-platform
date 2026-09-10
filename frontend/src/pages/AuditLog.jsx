@@ -26,6 +26,7 @@ const ACTION_OPTIONS = [
   "MOU_SIGNED",
   "MOU_DELETED",
 ];
+/*VITE_API_URL=https://rp-leo-platform.onrender.com*/
 
 const ACTION_COLORS = {
   MOU_CREATED: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
@@ -110,10 +111,6 @@ const JsonView = ({ value, depth = 0 }) => {
 const DetailsModal = ({ entry, onClose }) => {
   if (!entry) return null;
 
-  const metadata = entry.metadata || {};
-  const hasBeforeAfter =
-    metadata.before !== undefined || metadata.after !== undefined;
-
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
@@ -161,99 +158,15 @@ const DetailsModal = ({ entry, onClose }) => {
         </div>
 
         {/* BODY */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
-          {/* CORE FIELDS */}
-          <section>
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-[#F59E0B] mb-3">
-              Event
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-              <FieldRow label="Action" value={entry.action} />
-              <FieldRow label="Status" value={entry.status} />
-              <FieldRow label="Created" value={formatDateTime(entry.created_at)} />
-              <FieldRow label="Attempts" value={entry.attempt_count} />
-              <FieldRow label="Request ID" value={entry.request_id} mono />
-            </div>
-          </section>
-
-          <section>
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-[#F59E0B] mb-3">
-              Actor
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-              <FieldRow label="ID" value={entry.actor_id} mono />
-              <FieldRow label="Name" value={entry.actor_name} />
-              <FieldRow label="Role" value={entry.actor_role} />
-              <FieldRow label="IP" value={entry.ip} mono />
-              <FieldRow label="User Agent" value={entry.user_agent} />
-            </div>
-          </section>
-
-          <section>
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-[#F59E0B] mb-3">
-              Target
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-              <FieldRow label="Type" value={entry.target_type} />
-              <FieldRow label="ID" value={entry.target_id} mono />
-            </div>
-          </section>
-
-          {/* CHANGED FIELDS (MoU updates) */}
-          {metadata.changed_fields && metadata.changed_fields.length > 0 && (
-            <section>
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-[#F59E0B] mb-3">
-                Changed Fields
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {metadata.changed_fields.map((f) => (
-                  <span
-                    key={f}
-                    className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest border border-blue-500/20 bg-blue-500/10 text-blue-300"
-                  >
-                    {f}
-                  </span>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* BEFORE / AFTER */}
-          {hasBeforeAfter && (
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {metadata.before && (
-                <div>
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-rose-300 mb-3">
-                    Before
-                  </h3>
-                  <div className="rounded-xl border border-rose-500/20 bg-rose-500/[0.04] p-4 max-h-72 overflow-y-auto custom-scrollbar">
-                    <JsonView value={metadata.before} />
-                  </div>
-                </div>
-              )}
-              {metadata.after && (
-                <div>
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-300 mb-3">
-                    After
-                  </h3>
-                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] p-4 max-h-72 overflow-y-auto custom-scrollbar">
-                    <JsonView value={metadata.after} />
-                  </div>
-                </div>
-              )}
-            </section>
-          )}
-
-          {entry.last_error && (
-            <section>
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-rose-400 mb-3">
-                Last Error
-              </h3>
-              <pre className="rounded-xl border border-rose-500/20 bg-rose-500/[0.04] p-4 text-xs text-rose-200 whitespace-pre-wrap break-words">
-                {entry.last_error}
-              </pre>
-            </section>
-          )}
+        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+            <FieldRow label="Who" value={entry.actor_name} />
+            <FieldRow label="Role" value={entry.actor_role} />
+            <FieldRow label="What" value={entry.message} />
+            <FieldRow label="Date and time" value={formatDateTime(entry.created_at)} />
+            <FieldRow label="Action" value={entry.action} />
+            <FieldRow label="Audit record saved" value={entry.status === "success" ? "Yes" : "No"} />
+          </div>
         </div>
       </div>
     </div>
@@ -386,8 +299,7 @@ export default function AuditLog() {
             System <span className="text-[#00A8B5]">Activity</span>
           </h1>
           <p className="text-xs md:text-sm text-gray-400 max-w-lg mb-8">
-            Immutable record of administrative actions across the Regional
-            Partnership platform. Click any row for full before/after details.
+            Record of important actions across the Regional Partnership platform.
           </p>
 
           {/* TOOLBAR */}
@@ -510,11 +422,11 @@ export default function AuditLog() {
               <table className="w-full min-w-[900px] text-xs">
                 <thead className="bg-white/[0.03] text-gray-400 uppercase tracking-widest border-b border-white/5">
                   <tr>
-                    <th className="px-4 py-4 text-left font-black">Time</th>
+                    <th className="px-4 py-4 text-left font-black">Date and time</th>
                     <th className="px-4 py-4 text-left font-black">Action</th>
-                    <th className="px-4 py-4 text-left font-black">Actor</th>
-                    <th className="px-4 py-4 text-left font-black">Target</th>
-                    <th className="px-4 py-4 text-left font-black">Message</th>
+                    <th className="px-4 py-4 text-left font-black">Who / Role</th>
+                    <th className="px-4 py-4 text-left font-black">What</th>
+                    <th className="px-4 py-4 text-left font-black">Saved</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
@@ -575,22 +487,15 @@ export default function AuditLog() {
                             {e.actor_role || "—"}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-gray-400 font-mono text-[10px]">
-                          {e.target_type ? (
-                            <span>
-                              {e.target_type}:{" "}
-                              <span className="text-slate-300">
-                                {e.target_id?.slice(0, 8) || "—"}
-                              </span>
-                            </span>
-                          ) : (
-                            "—"
-                          )}
-                        </td>
                         <td className="px-4 py-3 text-slate-300 max-w-md">
                           <div className="truncate" title={e.message || ""}>
                             {e.message || "—"}
                           </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={e.status === "success" ? "text-emerald-400" : "text-rose-400"}>
+                            {e.status === "success" ? "Yes" : "No"}
+                          </span>
                         </td>
                       </tr>
                     ))
