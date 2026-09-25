@@ -26,7 +26,6 @@ const ACTION_OPTIONS = [
   "MOU_SIGNED",
   "MOU_DELETED",
 ];
-/*VITE_API_URL=https://rp-leo-platform.onrender.com*/
 
 const ACTION_COLORS = {
   MOU_CREATED: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
